@@ -41,16 +41,12 @@ class GameWindow extends React.Component {
   gameLoop = () => {
     this.renderCanvas();
 
-    if (isKeyPressed('w') && !isKeyPressed('s')) {
-      socket.emit('playerAction', 'moveUp');
-    } else if (isKeyPressed('s')) {
-      socket.emit('playerAction', 'moveDown');
-    }
-    if (isKeyPressed('a') && !isKeyPressed('d')) {
-      socket.emit('playerAction', 'moveLeft');
-    } else if (isKeyPressed('d')) {
-      socket.emit('playerAction', 'moveRight');
-    }
+    socket.emit('playerMovement', {
+      w: isKeyPressed('w'),
+      s: isKeyPressed('s'),
+      a: isKeyPressed('a'),
+      d: isKeyPressed('d'),
+    });
 
     // Request next game loop
     this.rafId = requestAnimationFrame(this.gameLoop);

@@ -2,6 +2,7 @@
 const http = require('http');
 const { Server } = require('socket.io');
 const gameLogic = require('./game');
+const packets = require('./packets');
 
 let io;
 
@@ -14,12 +15,11 @@ const initSocketEvents = (socket) => {
   socket.on('disconnect', () => {
     console.log('a user disconnected');
     gameLogic.removePlayer(socket.id);
-    io.emit('gameUpdate', gameLogic.getGameData());
   });
 
-  socket.on('playerAction', (action) => {
-    const gameData = gameLogic.updateGame(socket.id, action);
-    io.emit('gameUpdate', gameData);
+  socket.on('playerMovement', (packet) => {
+    const { w, a, s, d } = packet;
+    gameLogic.onPlayerMovementPacket(new packets.PlayerMovementPacket(socket.id, w, a, s, d));
   });
 
   const gameData = gameLogic.getGameData();
@@ -35,6 +35,11 @@ const socketSetup = (app) => {
   io = new Server(server);
   io.on('connection', (socket) => {
     initSocketEvents(socket);
+  });
+
+  setInterval(() => {
+    gameLogic.gameLoop();
+    io.emit('gameUpdate', gameLogic.getGameData());
   });
   return server;
 };

@@ -1,8 +1,12 @@
-const Player = require('./Player');
-let players = {};
+const Player = require('./Player.js');
+const Vector2 = require('./Vector2.js');
 
-let gameState = {
-  // TODO
+/** @type {{ [playerId: string]: Player }} */
+const players = {};
+
+const gameState = {
+  lastUpdatedTime: performance.now(),
+  deltaTime: 0, // in seconds
 };
 
 const getGameData = () => ({
@@ -10,29 +14,40 @@ const getGameData = () => ({
   gameState,
 });
 
-const updateGame = (playerId, action) => {
+/**
+ * @param {import('../packets').PlayerMovementPacket} packet
+ */
+const onPlayerMovementPacket = (packet) => {
+  const { playerId, w, s, a, d } = packet;
   const player = players[playerId];
   if (player) {
-    // Simple movement logic
-    const moveDistance = 10;
-    switch (action) {
-      case 'moveUp':
-        player.move(0, -moveDistance);
-        break;
-      case 'moveDown':
-        player.move(0, moveDistance);
-        break;
-      case 'moveLeft':
-        player.move(-moveDistance, 0);
-        break;
-      case 'moveRight':
-        player.move(moveDistance, 0);
-        break;
-      default:
+    if (w === s) {
+      player.direction.y = 0;
+    } else if (w) {
+      player.direction.y = -1;
+    } else if (s) {
+      player.direction.y = 1;
+    }
+    if (a === d) {
+      player.direction.x = 0;
+    } else if (a) {
+      player.direction.x = -1;
+    } else if (d) {
+      player.direction.x = 1;
     }
   }
+};
 
-  return getGameData();
+const gameLoop = () => {
+  // Update delta time
+  const currentTime = performance.now() / 1000;
+  const deltaTime = currentTime - gameState.lastUpdatedTime;
+  gameState.deltaTime = deltaTime;
+
+  Object.values(players).forEach((player) => {
+    player.move(gameState.deltaTime);
+  });
+  gameState.lastUpdatedTime = currentTime;
 };
 
 const addPlayer = (playerId, x, y, width, height) => {
@@ -43,4 +58,10 @@ const removePlayer = (playerId) => {
   delete players[playerId];
 };
 
-module.exports = { updateGame, addPlayer, removePlayer, getGameData };
+module.exports = {
+  onPlayerMovementPacket,
+  gameLoop,
+  addPlayer,
+  removePlayer,
+  getGameData,
+};
