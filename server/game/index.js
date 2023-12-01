@@ -5,6 +5,11 @@ let gameState = {
   // TODO
 };
 
+const getGameData = () => ({
+  players,
+  gameState,
+});
+
 const updateGame = (playerId, action) => {
   const player = players[playerId];
   if (player) {
@@ -27,7 +32,7 @@ const updateGame = (playerId, action) => {
     }
   }
 
-  return { players, gameState };
+  return getGameData();
 };
 
 const addPlayer = (playerId, x, y, width, height) => {
@@ -38,4 +43,4 @@ const removePlayer = (playerId) => {
   delete players[playerId];
 };
 
-module.exports = { updateGame, addPlayer, removePlayer, players, gameState };
+module.exports = { updateGame, addPlayer, removePlayer, getGameData };

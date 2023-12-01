@@ -14,6 +14,7 @@ const initSocketEvents = (socket) => {
   socket.on('disconnect', () => {
     console.log('a user disconnected');
     gameLogic.removePlayer(socket.id);
+    io.emit('gameUpdate', gameLogic.getGameData());
   });
 
   socket.on('playerAction', (action) => {
@@ -21,8 +22,10 @@ const initSocketEvents = (socket) => {
     io.emit('gameUpdate', gameData);
   });
 
-  console.log(gameLogic.players);
-  console.log(gameLogic.gameState);
+  const gameData = gameLogic.getGameData();
+  // Initial game update to the client
+  socket.emit('gameUpdate', gameData);
+  console.log(gameData);
 
   // ...Other code...
 };
