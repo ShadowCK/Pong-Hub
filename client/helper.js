@@ -1,5 +1,5 @@
 const handleError = (message) => {
-  // TODO
+  document.getElementById('error-msg').textContent = message;
 };
 
 /* Sends post requests to the server using fetch. Will look for various
