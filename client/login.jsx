@@ -42,6 +42,8 @@ const handleSignup = (e) => {
 
 const handleChangePassword = (e) => {
   e.preventDefault();
+  helper.handleError('Not implemented yet!');
+  return false;
 
   const oldPass = e.target.querySelector('#old-pass').value;
   const newPass = e.target.querySelector('#new-pass').value;
