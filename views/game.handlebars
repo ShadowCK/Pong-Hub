@@ -3,12 +3,50 @@
     <meta charset='utf-8' />
     <title>Pong Hub</title>
     <link rel='shortcut icon' href='/assets/img/favicon.png' />
-    <link rel='stylesheet' type='text/css' href='/assets/style.css' />
+    <link rel='stylesheet' href='/assets/bulma.css' />
+    <link rel='stylesheet' href='/assets/game.css' />
   </head>
   <body>
-    <nav>
-      <div class='nav-button'><a href='/logout'>Log out</a></div>
+    <!-- Navigation bar -->
+    <nav class='navbar' role='navigation' aria-label='main navigation'>
+      <div class='navbar-brand'>
+        <a class='navbar-item' href='/'>
+          <img src='/assets/img/logo.png' width='112' height='28' />
+        </a>
+      </div>
+
+      <div class='navbar-menu'>
+        <div class='navbar-start'>
+          <a class='navbar-item'>Username</a>
+        </div>
+
+        <div class='navbar-end'>
+          <div class='navbar-item'>
+            <div class='buttons'>
+              <a class='button is-light' href='/changePassword'>Change Password</a>
+              <a class='button is-light' href='/logout'>Log Out</a>
+            </div>
+          </div>
+        </div>
+      </div>
     </nav>
+
+    <!-- Game window -->
+    <section class='section'>
+      <div class='container'>
+        <h2 class='title is-4'>Game Window</h2>
+        <canvas id='gameCanvas' width='800' height='600'></canvas>
+      </div>
+    </section>
+
+    <!-- Recharge and purchase items section -->
+    <section class='section'>
+      <div class='container'>
+        <h2 class='title is-4'>Recharge and Purchase Items</h2>
+        <!-- Placeholder content -->
+        <p>Placeholder for recharge and purchase items</p>
+      </div>
+    </section>
 
     <script src='/assets/gameBundle.js'></script>
   </body>

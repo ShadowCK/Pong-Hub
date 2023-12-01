@@ -1,0 +1,12 @@
+/* Basic styles for visualization */
+#gameCanvas {
+  border: 1px solid #ddd; /* Add border to the canvas */
+  background-color: #f5f5f5; /* Light grey background */
+}
+.section {
+  border: 1px solid #eee; /* Light border for sections */
+  margin-bottom: 20px; /* Space between sections */
+}
+.navbar {
+  background-color: #eee; /* Different background for navbar */
+}
