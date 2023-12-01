@@ -24,8 +24,10 @@ const session = require('express-session');
 const RedisStore = require('connect-redis').default;
 // Redis client
 const redis = require('redis');
-// Router module
+// Router
 const router = require('./router.js');
+// Socket.io setup
+const socketSetup = require('./io.js');
 
 const port = process.env.PORT || process.env.NODE_PORT || 3000;
 
@@ -71,7 +73,10 @@ redisClient.connect().then(() => {
 
   router(app);
 
-  app.listen(port, (err) => {
+  // socket.io library can add socket.io to existing http or express servers.
+  const server = socketSetup(app);
+
+  server.listen(port, (err) => {
     if (err) {
       throw err;
     }
