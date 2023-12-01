@@ -4,24 +4,14 @@ const helper = require('./helper.js');
 
 const socket = io();
 
+const keyStates = new Map();
 const handleKeyDown = (e) => {
-  switch (e.key) {
-    case 'w':
-      socket.emit('playerAction', 'moveUp');
-      break;
-    case 's':
-      socket.emit('playerAction', 'moveDown');
-      break;
-    case 'a':
-      socket.emit('playerAction', 'moveLeft');
-      break;
-    case 'd':
-      socket.emit('playerAction', 'moveRight');
-      break;
-    default:
-      break;
-  }
+  keyStates.set(e.key, true);
 };
+const handleKeyUp = (e) => {
+  keyStates.set(e.key, false);
+};
+const isKeyPressed = (key) => keyStates.get(key) || false;
 
 class GameWindow extends React.Component {
   constructor(props) {
@@ -35,12 +25,36 @@ class GameWindow extends React.Component {
 
   componentDidMount() {
     socket.on('gameUpdate', (gameData) => {
-      this.setState({ players: gameData.players, gameState: gameData.gameState }, () => {
-        this.renderCanvas();
-        console.log("updated canvas")
-      });
+      this.setState({ players: gameData.players, gameState: gameData.gameState });
     });
+
+    this.gameLoop();
   }
+
+  componentWillUnmount() {
+    // Stop game loop
+    if (this.rafId) {
+      cancelAnimationFrame(this.rafId);
+    }
+  }
+
+  gameLoop = () => {
+    this.renderCanvas();
+
+    if (isKeyPressed('w') && !isKeyPressed('s')) {
+      socket.emit('playerAction', 'moveUp');
+    } else if (isKeyPressed('s')) {
+      socket.emit('playerAction', 'moveDown');
+    }
+    if (isKeyPressed('a') && !isKeyPressed('d')) {
+      socket.emit('playerAction', 'moveLeft');
+    } else if (isKeyPressed('d')) {
+      socket.emit('playerAction', 'moveRight');
+    }
+
+    // Request next game loop
+    this.rafId = requestAnimationFrame(this.gameLoop);
+  };
 
   renderCanvas() {
     const canvas = this.canvasRef.current;
@@ -67,7 +81,11 @@ class GameWindow extends React.Component {
 const init = () => {
   // Register keydown event
   window.addEventListener('keydown', handleKeyDown);
+  window.addEventListener('keyup', handleKeyUp);
   ReactDOM.render(<GameWindow />, document.getElementById('content'));
 };
+
+const gameLoop = () => {};
+window.requestAnimationFrame(gameLoop);
 
 window.onload = init;
