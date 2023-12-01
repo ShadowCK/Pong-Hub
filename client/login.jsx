@@ -1,6 +1,6 @@
+const helper = require('./helper.js');
 const React = require('react');
 const ReactDOM = require('react-dom');
-const helper = require('./helper.js');
 
 const handleLogin = (e) => {
   e.preventDefault();
@@ -40,14 +40,37 @@ const handleSignup = (e) => {
   return false;
 };
 
-const LoginWindow = (props) => (
+const handleChangePassword = (e) => {
+  e.preventDefault();
+
+  const oldPass = e.target.querySelector('#oldPass').value;
+  const newPass = e.target.querySelector('#newPass').value;
+  const newPass2 = e.target.querySelector('#newPass2').value;
+
+  if (!oldPass || !newPass || !newPass2) {
+    helper.handleError('All fields are required!');
+    return false;
+  }
+
+  if (newPass !== newPass2) {
+    helper.handleError('New passwords do not match!');
+    return false;
+  }
+
+  helper.sendPost('/changePassword', { oldPass, newPass });
+
+  return false;
+};
+
+const LoginWindow = (props) => {
+  return (
     <form
-      id="loginForm"
-      name="loginForm"
+      id="login-Form"
+      name="login-Form"
       onSubmit={handleLogin}
       action="login"
       method="POST"
-      className="mainForm"
+      className="main-Form"
     >
       <label htmlFor="username">Username: </label>
       <input id="user" type="text" name="username" placeholder="username" />
@@ -55,16 +78,18 @@ const LoginWindow = (props) => (
       <input id="pass" type="password" name="pass" placeholder="password" />
       <input className="formSubmit" type="submit" value="Sign in" />
     </form>
-);
+  );
+};
 
-const SignupWindow = (props) => (
+const SignupWindow = (props) => {
+  return (
     <form
-      id="signupForm"
-      name="signupForm"
+      id="signup-form"
+      name="signup-form"
       onSubmit={handleSignup}
       action="/signup"
       method="POST"
-      className="mainForm"
+      className="main-Form"
     >
       <label htmlFor="username">Username: </label>
       <input id="user" type="text" name="username" placeholder="username" />
@@ -74,12 +99,34 @@ const SignupWindow = (props) => (
       <input id="pass2" type="password" name="pass2" placeholder="retype password" />
       <input className="formSubmit" type="submit" value="Sign up" />
     </form>
+  );
+};
+
+const ChangePasswordWindow = (props) => (
+  <form
+    id="change-password-form"
+    name="change-password-form"
+    onSubmit={handleChangePassword}
+    action="/changePassword"
+    method="POST"
+    className="main-Form"
+  >
+    <label htmlFor="oldPass">Old Password: </label>
+    <input id="oldPass" type="password" name="oldPass" placeholder="old password" />
+    <label htmlFor="newPass">New Password: </label>
+    <input id="newPass" type="password" name="newPass" placeholder="new password" />
+    <label htmlFor="newPass2">Retype New Password: </label>
+    <input id="newPass2" type="password" name="newPass2" placeholder="retype new password" />
+    <input className="formSubmit" type="submit" value="Change Password" />
+  </form>
 );
 
 const init = () => {
-  const loginButton = document.getElementById('loginButton');
-  const signupButton = document.getElementById('signupButton');
+  const loginButton = document.getElementById('login-button');
+  const signupButton = document.getElementById('signup-button');
+  const changePasswordButton = document.getElementById('change-password-button');
 
+  // Register event handlers
   loginButton.addEventListener('click', (e) => {
     e.preventDefault();
     ReactDOM.render(<LoginWindow />, document.getElementById('content'));
@@ -92,6 +139,13 @@ const init = () => {
     return false;
   });
 
+  changePasswordButton.addEventListener('click', (e) => {
+    e.preventDefault();
+    ReactDOM.render(<ChangePasswordWindow />, document.getElementById('content'));
+    return false;
+  });
+
+  // Render initial window
   ReactDOM.render(<LoginWindow />, document.getElementById('content'));
 };
 
