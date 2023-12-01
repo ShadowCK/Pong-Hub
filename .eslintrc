@@ -1,8 +1,13 @@
-{ 
+{
   "extends": "airbnb/base",
   "rules": {
-    "no-underscore-dangle" : "off",
+    "no-underscore-dangle": "off",
     "no-plusplus": "off",
     "import/extensions": "off"
+  },
+  // For dev purpose only. Will be removed after project is done.
+  "env": {
+    "browser": true,
+    "node": true
   }
 }

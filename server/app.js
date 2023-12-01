@@ -1,22 +1,35 @@
+// Read .env file and set environment variables for local development
 require('dotenv').config();
 
+// Require modules
+// Node.js path module
 const path = require('path');
+// Express web framework
 const express = require('express');
+// Compression middleware
 const compression = require('compression');
+// Favicon middleware
 const favicon = require('serve-favicon');
+// Body parsing middleware
 const bodyParser = require('body-parser');
+// Mongoose MongoDB ODM
 const mongoose = require('mongoose');
+// Handlebars view engine
 const expressHandlebars = require('express-handlebars');
+// Helmet security middleware
 const helmet = require('helmet');
+// Express session middleware
 const session = require('express-session');
+// Redis session store
 const RedisStore = require('connect-redis').default;
+// Redis client
 const redis = require('redis');
-
+// Router module
 const router = require('./router.js');
 
 const port = process.env.PORT || process.env.NODE_PORT || 3000;
 
-const dbURI = process.env.MONGODB_URI || 'mongodb://127.0.0.1/DomoMaker';
+const dbURI = process.env.MONGODB_URI || 'mongodb://127.0.0.1/PongHub';
 mongoose.connect(dbURI).catch((err) => {
   if (err) {
     console.log('Could not connect to database');
@@ -44,8 +57,9 @@ redisClient.connect().then(() => {
       key: 'sessionid',
       store: new RedisStore({
         client: redisClient,
+        prefix: 'ponghub:sess:',
       }),
-      secret: 'Domo Arigato',
+      secret: process.env.SESSION_SECRET,
       resave: false,
       saveUninitialized: false,
     }),

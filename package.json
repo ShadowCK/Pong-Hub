@@ -10,7 +10,8 @@
     "start": "node ./server/app.js",
     "pretest": "eslint ./server --fix",
     "test": "echo \"Tests complete\"",
-    "heroku-postbuild": "webpack"
+    "heroku-postbuild": "webpack",
+    "testall": "eslint ./client --fix ./server --fix"
   },
   "keywords": [
     "Node",
@@ -18,7 +19,7 @@
     "Redis",
     "Login"
   ],
-  "author": "Cody Van De Mark / Austin Willoughby",
+  "author": "Zhao Jin",
   "license": "Apache 2.0",
   "devDependencies": {
     "@babel/core": "^7.23.3",
