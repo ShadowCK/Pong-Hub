@@ -9,7 +9,7 @@ const requiresLogin = (req, res, next) => {
 
 const requiresLogout = (req, res, next) => {
   if (req.session.account) {
-    return redirect(req, res, '/maker');
+    return redirect(req, res, '/game');
   }
   return next();
 };

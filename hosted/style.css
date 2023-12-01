@@ -70,3 +70,23 @@ nav:hover {
 .main-form .input-container > * {
   width: fit-content;
 }
+
+#msg-box {
+  margin-top: 20px;
+  width: fit-content;
+  height: fit-content;
+  overflow-x: hidden;
+  overflow-y: auto;
+  width: 200px;
+  height: 70px;
+  border: solid 2px rgb(25, 25, 25);
+  padding: 10px;
+  border-radius: 4px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#error-msg {
+  margin: 0;
+}

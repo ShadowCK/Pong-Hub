@@ -5,7 +5,7 @@ const helper = require('./helper.js');
 const handleLogin = (e) => {
   e.preventDefault();
 
-  const username = e.target.querySelector('#user').value;
+  const username = e.target.querySelector('#username').value;
   const pass = e.target.querySelector('#pass').value;
 
   if (!username || !pass) {
@@ -21,7 +21,7 @@ const handleLogin = (e) => {
 const handleSignup = (e) => {
   e.preventDefault();
 
-  const username = e.target.querySelector('#user').value;
+  const username = e.target.querySelector('#username').value;
   const pass = e.target.querySelector('#pass').value;
   const pass2 = e.target.querySelector('#pass2').value;
 
@@ -43,9 +43,9 @@ const handleSignup = (e) => {
 const handleChangePassword = (e) => {
   e.preventDefault();
 
-  const oldPass = e.target.querySelector('#oldPass').value;
-  const newPass = e.target.querySelector('#newPass').value;
-  const newPass2 = e.target.querySelector('#newPass2').value;
+  const oldPass = e.target.querySelector('#old-pass').value;
+  const newPass = e.target.querySelector('#new-pass').value;
+  const newPass2 = e.target.querySelector('#new-pass2').value;
 
   if (!oldPass || !newPass || !newPass2) {
     helper.handleError('All fields are required!');
@@ -62,9 +62,7 @@ const handleChangePassword = (e) => {
   return false;
 };
 
-const FormInput = ({
-  label, id, name = id, type, placeholder, size,
-}) => (
+const FormInput = ({ label, id, name = id, type, placeholder, size }) => (
   <div className="input-container">
     <label htmlFor={id}>{label}</label>
     <input id={id} type={type} name={name} placeholder={placeholder} {...(size ? { size } : {})} />
@@ -76,7 +74,7 @@ const LoginWindow = () => (
     id="login-form"
     name="login-form"
     onSubmit={handleLogin}
-    action="login"
+    action="/login"
     method="POST"
     className="main-form"
   >
