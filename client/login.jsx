@@ -1,10 +1,9 @@
-const helper = require('./helper.js');
 const React = require('react');
 const ReactDOM = require('react-dom');
+const helper = require('./helper.js');
 
 const handleLogin = (e) => {
   e.preventDefault();
-  helper.hideError();
 
   const username = e.target.querySelector('#user').value;
   const pass = e.target.querySelector('#pass').value;
@@ -21,7 +20,6 @@ const handleLogin = (e) => {
 
 const handleSignup = (e) => {
   e.preventDefault();
-  helper.hideError();
 
   const username = e.target.querySelector('#user').value;
   const pass = e.target.querySelector('#pass').value;
@@ -42,8 +40,7 @@ const handleSignup = (e) => {
   return false;
 };
 
-const LoginWindow = (props) => {
-  return (
+const LoginWindow = (props) => (
     <form
       id="loginForm"
       name="loginForm"
@@ -58,11 +55,9 @@ const LoginWindow = (props) => {
       <input id="pass" type="password" name="pass" placeholder="password" />
       <input className="formSubmit" type="submit" value="Sign in" />
     </form>
-  );
-};
+);
 
-const SignupWindow = (props) => {
-  return (
+const SignupWindow = (props) => (
     <form
       id="signupForm"
       name="signupForm"
@@ -79,8 +74,7 @@ const SignupWindow = (props) => {
       <input id="pass2" type="password" name="pass2" placeholder="retype password" />
       <input className="formSubmit" type="submit" value="Sign up" />
     </form>
-  );
-};
+);
 
 const init = () => {
   const loginButton = document.getElementById('loginButton');

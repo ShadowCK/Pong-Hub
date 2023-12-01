@@ -11,7 +11,7 @@
     "pretest": "eslint ./server --fix",
     "test": "echo \"Tests complete\"",
     "heroku-postbuild": "webpack",
-    "testall": "eslint ./client --fix ./server --fix"
+    "testall": "eslint ./client ./server --fix --ext .js --ext .jsx"
   },
   "keywords": [
     "Node",

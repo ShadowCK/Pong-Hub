@@ -6,6 +6,11 @@
     "import/extensions": "off"
   },
   // For dev purpose only. Will be removed after project is done.
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
   "env": {
     "browser": true,
     "node": true
