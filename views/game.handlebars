@@ -35,7 +35,8 @@
     <section class='section'>
       <div class='container'>
         <h2 class='title is-4'>Game Window</h2>
-        <canvas id='gameCanvas' width='800' height='600'></canvas>
+        <!-- GameWindow from React will render here -->
+        <div id='content'></div>
       </div>
     </section>
 
@@ -47,6 +48,9 @@
         <p>Placeholder for recharge and purchase items</p>
       </div>
     </section>
+
+    <!-- socket IO client -->
+    <script src='/socket.io/socket.io.js'></script>
 
     <script src='/assets/gameBundle.js'></script>
   </body>
