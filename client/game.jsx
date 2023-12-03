@@ -27,8 +27,11 @@ class GameWindow extends React.Component {
       height: 600,
       backgroundColor: '#ffffff',
       physics: {
-        default: 'arcade',
-        arcade: { gravity: { y: 300 }, debug: false },
+        default: 'matter',
+        matter: {
+          gravity: { y: 0 },
+          debug: true,
+        },
       },
       scene: {
         preload: function preload() {
