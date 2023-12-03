@@ -1,5 +1,4 @@
 const Player = require('./Player.js');
-const Vector2 = require('./Vector2.js');
 
 /** @type {{ [playerId: string]: Player }} */
 const players = {};
@@ -23,17 +22,13 @@ const onPlayerMovementPacket = (packet) => {
   if (player) {
     if (w === s) {
       player.direction.y = 0;
-    } else if (w) {
-      player.direction.y = -1;
-    } else if (s) {
-      player.direction.y = 1;
+    } else {
+      player.direction.y = w ? -1 : 1;
     }
     if (a === d) {
       player.direction.x = 0;
-    } else if (a) {
-      player.direction.x = -1;
-    } else if (d) {
-      player.direction.x = 1;
+    } else {
+      player.direction.x = a ? -1 : 1;
     }
   }
 };
