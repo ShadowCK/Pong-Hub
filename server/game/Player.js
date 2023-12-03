@@ -11,19 +11,20 @@ class Player {
 
   // * "Seems Matter’s velocity is meters (pixels) per step or 1/60s"
   // https://phaser.discourse.group/t/setting-velocity-for-matter-js-object/13327/3
-  maxSpeed = 400 / 60;
+  maxSpeed = 200 / 60;
 
-  acceleration = 400 / 60;
+  acceleration = 800 / 60;
 
   constructor(id, x, y, width, height) {
     this.id = id;
     this.width = width;
     this.height = height;
     this.body = Matter.Bodies.rectangle(x, y, width, height);
-    // FIXME: This is for testing only
-    this.body.friction = 0;
-    this.body.frictionStatic = 0;
-    this.body.frictionAir = 0;
+    // High speed low drag!
+    this.body.frictionAir = 0.004;
+    this.body.friction = 0.04;
+    this.body.frictionStatic = 0.1;
+    this.body.restitution = 0.5;
   }
 
   get position() {

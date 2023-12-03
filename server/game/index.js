@@ -10,10 +10,10 @@ engine.gravity = { x: 0, y: 0 }; // No gravity
 const wallOptions = { isStatic: true }; // isStatic means the object will not move
 const walls = [
   // top, bottom, left, right
-  Bodies.rectangle(400, 0, 800, 50, wallOptions),
-  Bodies.rectangle(400, 600, 800, 50, wallOptions),
-  Bodies.rectangle(0, 300, 50, 600, wallOptions),
-  Bodies.rectangle(800, 300, 50, 600, wallOptions),
+  Bodies.rectangle(400, -20, 800, 50, wallOptions),
+  Bodies.rectangle(400, 620, 800, 50, wallOptions),
+  Bodies.rectangle(-20, 300, 50, 600, wallOptions),
+  Bodies.rectangle(820, 300, 50, 600, wallOptions),
 ];
 // Add walls to the game world
 World.add(engine.world, walls);
@@ -56,25 +56,30 @@ const getGameData = () => {
 const onPlayerMovementPacket = (packet) => {
   const { playerId, w, s, a, d } = packet;
   const player = players[playerId];
-  const newDir = { x: 0, y: 0 };
+  const accDir = { x: 0, y: 0 };
   if (player) {
     if (w === s) {
-      newDir.y = 0;
+      accDir.y = 0;
     } else {
-      newDir.y = w ? -1 : 1;
+      accDir.y = w ? -1 : 1;
     }
     if (a === d) {
-      newDir.x = 0;
+      accDir.x = 0;
     } else {
-      newDir.x = a ? -1 : 1;
+      accDir.x = a ? -1 : 1;
     }
-    player.direction = newDir;
-    player.speed = Math.min(
-      player.speed + player.acceleration * gameState.deltaTime,
-      player.maxSpeed,
+    player.velocity = Matter.Vector.add(
+      player.velocity,
+      Matter.Vector.mult(accDir, player.acceleration * gameState.deltaTime),
     );
+    const currentSpeed = Matter.Vector.magnitude(player.velocity);
+    if (currentSpeed > player.maxSpeed) {
+      player.velocity = Matter.Vector.mult(player.velocity, player.maxSpeed / currentSpeed);
+    }
   }
 };
+
+const physicsUpdateIterations = 4;
 
 const gameLoop = () => {
   // Update delta time
@@ -83,12 +88,12 @@ const gameLoop = () => {
   gameState.deltaTime = deltaTime;
 
   // Update physics engine
-  Engine.update(engine, deltaTime * 1000); // in miliseconds
-  if (Object.values(players)[0]) {
-    console.log(Object.values(players)[0].speed * 60);
+  const deltaTimeMs = deltaTime * 1000; // in miliseconds
+  for (let i = 0; i < physicsUpdateIterations; i += 1) {
+    Engine.update(engine, deltaTimeMs / physicsUpdateIterations);
   }
-
   gameState.lastUpdatedTime = currentTime;
+  console.log(walls[0]);
 };
 
 const addPlayer = (playerId, x, y, width, height) => {
