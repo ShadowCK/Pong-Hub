@@ -40,7 +40,7 @@ const socketSetup = (app) => {
   setInterval(() => {
     gameLogic.gameLoop();
     io.emit('gameUpdate', gameLogic.getGameData());
-  });
+  }, 1000 / 60);
   return server;
 };
 

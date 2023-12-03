@@ -1,88 +1,104 @@
 const React = require('react');
 const ReactDOM = require('react-dom');
+const Phaser = require('phaser');
 const helper = require('./helper.js');
 
 const socket = io();
 
-const keyStates = new Map();
-const handleKeyDown = (e) => {
-  keyStates.set(e.key, true);
-};
-const handleKeyUp = (e) => {
-  keyStates.set(e.key, false);
-};
-const isKeyPressed = (key) => keyStates.get(key) || false;
-
 class GameWindow extends React.Component {
+  /** @type {Phaser.GameObjects.Graphics} */
+  graphics;
+
   constructor(props) {
     super(props);
     this.state = {
       players: {},
       gameState: {},
     };
-    this.canvasRef = React.createRef();
   }
 
   componentDidMount() {
+    const gameWindow = this;
+    // Create the Phaser game instance
+    this.game = new Phaser.Game({
+      type: Phaser.AUTO,
+      parent: 'game-window',
+      width: 800,
+      height: 600,
+      backgroundColor: '#ffffff',
+      physics: {
+        default: 'arcade',
+        arcade: { gravity: { y: 300 }, debug: false },
+      },
+      scene: {
+        preload: function preload() {
+          gameWindow.preload(this);
+        },
+        create: function create() {
+          gameWindow.create(this);
+        },
+        update: function update(time, delta) {
+          gameWindow.update(this, time, delta);
+        },
+      },
+    });
+  }
+
+  componentWillUnmount() {
+    this.game.destroy(true);
+  }
+
+  /**
+   * @param {Phaser.Scene} scene
+   */
+  preload = (scene) => {};
+
+  /**
+   * @param {Phaser.Scene} scene
+   */
+  create = (scene) => {
+    this.graphics = scene.add.graphics({ fillStyle: { color: 0x00000 } });
+    // Register socket event handlers
     socket.on('gameUpdate', (gameData) => {
       this.setState({ players: gameData.players, gameState: gameData.gameState });
     });
 
-    this.gameLoop();
-  }
-
-  componentWillUnmount() {
-    // Stop game loop
-    if (this.rafId) {
-      cancelAnimationFrame(this.rafId);
-    }
-  }
-
-  gameLoop = () => {
-    this.renderCanvas();
-
-    socket.emit('playerMovement', {
-      w: isKeyPressed('w'),
-      s: isKeyPressed('s'),
-      a: isKeyPressed('a'),
-      d: isKeyPressed('d'),
-    });
-
-    // Request next game loop
-    this.rafId = requestAnimationFrame(this.gameLoop);
+    this.cursors = scene.input.keyboard.createCursorKeys();
+    this.wKey = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
+    this.aKey = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
+    this.sKey = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
+    this.dKey = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
   };
 
-  renderCanvas() {
-    const canvas = this.canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    const { players } = this.state;
+  /**
+   * @param {Phaser.Scene} scene
+   * @param {number} time
+   * @param {number} delta
+   */
+  update = (scene, time, delta) => {
+    const movement = {
+      w: this.wKey.isDown,
+      a: this.aKey.isDown,
+      s: this.sKey.isDown,
+      d: this.dKey.isDown,
+    };
+    socket.emit('playerMovement', movement);
 
-    // Reset canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    Object.values(players).forEach((player) => {
-      // Draw every player
-      ctx.fillStyle = 'blue';
-      ctx.fillRect(player.x, player.y, player.width, player.height);
+    this.graphics.clear();
+    Object.values(this.state.players).forEach((player) => {
+      this.graphics.fillRect(player.x, player.y, player.width, player.height);
     });
-  }
+  };
 
   render() {
     return (
-      <div id="game-window">
-        <canvas ref={this.canvasRef} width="800" height="600"></canvas>
-      </div>
+      <div id="game-window"></div> // Phaser will create the canvas element here
     );
   }
 }
 
 const init = () => {
-  // Register keydown event
-  window.addEventListener('keydown', handleKeyDown);
-  window.addEventListener('keyup', handleKeyUp);
   ReactDOM.render(<GameWindow />, document.getElementById('content'));
 };
-
-const gameLoop = () => {};
-window.requestAnimationFrame(gameLoop);
 
 window.onload = init;
