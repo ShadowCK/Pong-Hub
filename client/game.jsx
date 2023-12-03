@@ -57,7 +57,8 @@ class GameWindow extends React.Component {
     const ctx = canvas.getContext('2d');
     const { players } = this.state;
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height); // 清除 Canvas
+    // Reset canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     Object.values(players).forEach((player) => {
       // Draw every player
       ctx.fillStyle = 'blue';

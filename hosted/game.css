@@ -1,12 +1,22 @@
-/* Basic styles for visualization */
+/* Custom styles to enhance Bulma's base styling */
+
 #gameCanvas {
   border: 1px solid #ddd; /* Add border to the canvas */
   background-color: #f5f5f5; /* Light grey background */
 }
+
 .section {
   border: 1px solid #eee; /* Light border for sections */
   margin-bottom: 20px; /* Space between sections */
 }
+
+/* Custom navbar enhancements */
 .navbar {
-  background-color: #eee; /* Different background for navbar */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+/* Button hover effect */
+.button:hover {
+  transform: translateY(-2px); /* Slight lift on hover */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Shadow for a "raised" effect */
 }

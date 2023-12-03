@@ -64,47 +64,38 @@ const handleChangePassword = (e) => {
   return false;
 };
 
-const FormInput = ({ label, id, name = id, type, placeholder, size }) => (
-  <div className="input-container">
-    <label htmlFor={id}>{label}</label>
-    <input id={id} type={type} name={name} placeholder={placeholder} {...(size ? { size } : {})} />
+const FormInput = ({ label, id, name = id, type, placeholder }) => (
+  <div className="field">
+    <label className="label" htmlFor={id}>
+      {label}
+    </label>
+    <div className="control">
+      <input className="input" id={id} type={type} name={name} placeholder={placeholder} />
+    </div>
   </div>
 );
 
+const FormButton = ({ value }) => (
+  <div className="field">
+    <div className="control">
+      <input className="button is-primary" type="submit" value={value} />
+    </div>
+  </div>
+);
 const LoginWindow = () => (
-  <form
-    id="login-form"
-    name="login-form"
-    onSubmit={handleLogin}
-    action="/login"
-    method="POST"
-    className="main-form"
-  >
-    <FormInput label="Username:" id="username" type="text" placeholder="username" size="16" />
-    <FormInput label="Password:" id="pass" type="password" placeholder="password" size="16" />
-    <input className="formSubmit" type="submit" value="Sign in" />
+  <form id="login-form" name="login-form" onSubmit={handleLogin} action="/login" method="POST">
+    <FormInput label="Username:" id="username" type="text" placeholder="username" />
+    <FormInput label="Password:" id="pass" type="password" placeholder="password" />
+    <FormButton value="Sign in" />
   </form>
 );
 
 const SignupWindow = () => (
-  <form
-    id="signup-form"
-    name="signup-form"
-    onSubmit={handleSignup}
-    action="/signup"
-    method="POST"
-    className="main-form"
-  >
-    <FormInput label="Username:" id="username" type="text" placeholder="username" size="16" />
-    <FormInput label="Password:" id="pass" type="password" placeholder="password" size="16" />
-    <FormInput
-      label="Password:"
-      id="pass2"
-      type="password"
-      placeholder="retype password"
-      size="16"
-    />
-    <input className="formSubmit" type="submit" value="Sign up" />
+  <form id="signup-form" name="signup-form" onSubmit={handleSignup} action="/signup" method="POST">
+    <FormInput label="Username:" id="username" type="text" placeholder="username" />
+    <FormInput label="Password:" id="pass" type="password" placeholder="password" />
+    <FormInput label="Retype Password:" id="pass2" type="password" placeholder="retype password" />
+    <FormButton value="Sign up" />
   </form>
 );
 
@@ -115,30 +106,16 @@ const ChangePasswordWindow = () => (
     onSubmit={handleChangePassword}
     action="/changePassword"
     method="POST"
-    className="main-form"
   >
+    <FormInput label="Old Password:" id="old-pass" type="password" placeholder="old password" />
+    <FormInput label="New Password:" id="new-pass" type="password" placeholder="new password" />
     <FormInput
-      label="Old Password:"
-      id="old-pass"
-      type="password"
-      placeholder="old password"
-      size="16"
-    />
-    <FormInput
-      label="New Password:"
-      id="new-pass"
-      type="password"
-      placeholder="new password"
-      size="16"
-    />
-    <FormInput
-      label="New Password:"
+      label="Retype New Password:"
       id="new-pass2"
       type="password"
       placeholder="retype new password"
-      size="16"
     />
-    <input className="formSubmit" type="submit" value="Change Password" />
+    <FormButton value="Change Password" />
   </form>
 );
 

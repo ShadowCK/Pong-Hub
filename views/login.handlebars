@@ -3,22 +3,50 @@
     <meta charset='utf-8' />
     <title>Pong Hub</title>
     <link rel='shortcut icon' href='/assets/img/favicon.png' />
-    <link rel='stylesheet' type='text/css' href='/assets/login.css' />
+    <link rel='stylesheet' href='/assets/bulma.css' />
+    <link rel='stylesheet' href='/assets/login.css' />
   </head>
   <body>
-    <nav>
-      <div id='login-button' class='nav-button'>Login</div>
-      <div id='signup-button' class='nav-button'>Sign up</div>
-      <div id='change-password-button' class='nav-button'>Change Password</div>
+    <!-- Navigation bar -->
+    <nav class='navbar' role='navigation' aria-label='main navigation'>
+      <div class='navbar-brand'>
+        <a class='navbar-item' href='/'>
+          <img src='/assets/img/logo.png' width='112' height='28' />
+        </a>
+      </div>
+      <div class='navbar-menu'>
+        <div class='navbar-end'>
+          <div class='navbar-item'>
+            <div class='buttons'>
+              <a id='login-button' class='button is-light'>Login</a>
+              <a id='signup-button' class='button is-light'>Sign Up</a>
+              <a id='change-password-button' class='button is-light'>Change Password</a>
+            </div>
+          </div>
+        </div>
+      </div>
     </nav>
 
-    <section id='content'>
-
+    <!-- Content Section -->
+    <section class='section'>
+      <div class='container'>
+        <h2 class='title is-4'>Login to Pong Hub</h2>
+        <div id='content'>
+          <!-- Login form will be rendered here -->
+        </div>
+      </div>
     </section>
 
-    <div id='msg-box'>
-      <p id='error-msg'>No errors yet</p>
-    </div>
+    <!-- Message Box -->
+    <section class='section'>
+      <div class='container'>
+        <div id='msg-box' class='message is-danger'>
+          <div class='message-body'>
+            <p id='error-msg'>No errors yet</p>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <script src='/assets/loginBundle.js'></script>
   </body>
