@@ -5,6 +5,18 @@ const helper = require('./helper.js');
 
 const socket = io();
 
+function matterToPhaser(matterX, matterY, width, height) {
+  const phaserX = matterX - width / 2;
+  const phaserY = matterY - height / 2;
+
+  return {
+    x: phaserX,
+    y: phaserY,
+    width,
+    height,
+  };
+}
+
 class GameWindow extends React.Component {
   /** @type {Phaser.GameObjects.Graphics} */
   graphics;
@@ -14,6 +26,7 @@ class GameWindow extends React.Component {
     this.state = {
       players: {},
       gameState: {},
+      walls: [],
     };
   }
 
@@ -60,12 +73,17 @@ class GameWindow extends React.Component {
    * @param {Phaser.Scene} scene
    */
   create = (scene) => {
-    this.graphics = scene.add.graphics({ fillStyle: { color: 0x00000 } });
     // Register socket event handlers
     socket.on('gameUpdate', (gameData) => {
-      this.setState({ players: gameData.players, gameState: gameData.gameState });
+      this.setState({
+        players: gameData.players,
+        gameState: gameData.gameState,
+        walls: gameData.walls,
+      });
     });
-
+    // Create graphics object
+    this.graphics = scene.add.graphics({ fillStyle: { color: 0x00000 } });
+    // Register inputs
     this.cursors = scene.input.keyboard.createCursorKeys();
     this.wKey = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
     this.aKey = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
@@ -89,7 +107,14 @@ class GameWindow extends React.Component {
 
     this.graphics.clear();
     Object.values(this.state.players).forEach((player) => {
-      this.graphics.fillRect(player.x, player.y, player.width, player.height);
+      this.graphics.fillRect(
+        ...Object.values(matterToPhaser(player.x, player.y, player.width, player.height)),
+      );
+    });
+    Object.values(this.state.walls).forEach((wall) => {
+      this.graphics.fillRect(
+        ...Object.values(matterToPhaser(wall.x, wall.y, wall.width, wall.height)),
+      );
     });
   };
 

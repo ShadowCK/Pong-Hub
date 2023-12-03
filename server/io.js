@@ -10,7 +10,7 @@ const initSocketEvents = (socket) => {
   console.log('a user connected');
 
   // Add player to game
-  gameLogic.addPlayer(socket.id, 0, 0, 20, 100);
+  gameLogic.addPlayer(socket.id, 100, 100, 20, 100);
 
   socket.on('disconnect', () => {
     console.log('a user disconnected');
@@ -18,7 +18,9 @@ const initSocketEvents = (socket) => {
   });
 
   socket.on('playerMovement', (packet) => {
-    const { w, a, s, d } = packet;
+    const {
+      w, a, s, d,
+    } = packet;
     gameLogic.onPlayerMovementPacket(new packets.PlayerMovementPacket(socket.id, w, a, s, d));
   });
 
