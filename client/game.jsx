@@ -1,25 +1,9 @@
 const React = require('react');
 const ReactDOM = require('react-dom');
 const Phaser = require('phaser');
+const utils = require('./gameUtils.js');
 
 const socket = io();
-
-const matterToPhaser = ({ x, y, width, height, angle = 0 }) => ({
-  x: x - width / 2,
-  y: y - height / 2,
-  width,
-  height,
-  angle,
-});
-
-const drawMatterBody = (graphics, bodyData) => {
-  const { x, y, width, height, angle } = matterToPhaser(bodyData);
-  graphics.save();
-  graphics.translateCanvas(x + width / 2, y + height / 2);
-  graphics.rotateCanvas(angle);
-  graphics.fillRect(-width / 2, -height / 2, width, height);
-  graphics.restore();
-};
 
 class GameWindow extends React.Component {
   /** @type {Phaser.GameObjects.Graphics} */
@@ -93,6 +77,13 @@ class GameWindow extends React.Component {
     this.aKey = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
     this.sKey = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
     this.dKey = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
+    // Create a waiting for player text in lobby state
+    this.waitingText = scene.add.text(0, 0, 'Waiting for players...', {
+      font: '16px Arial',
+      fill: '#000000',
+    });
+    this.waitingText.setDepth(10000);
+    utils.centerGameObject(this.waitingText, scene);
   };
 
   /**
@@ -110,11 +101,17 @@ class GameWindow extends React.Component {
     socket.emit('playerMovement', movement);
 
     this.graphics.clear();
+    if (this.state.gameState.state === 'LOBBY') {
+      this.waitingText.setVisible(true);
+    } else {
+      this.waitingText.setVisible(false);
+    }
+    // Always draw the players and walls
     Object.values(this.state.players).forEach((playerData) => {
-      drawMatterBody(this.graphics, playerData);
+      utils.drawMatterBody(this.graphics, playerData);
     });
     Object.values(this.state.walls).forEach((wall) => {
-      this.graphics.fillRect(...Object.values(matterToPhaser(wall)));
+      utils.drawMatterBody(this.graphics, wall);
     });
   };
 

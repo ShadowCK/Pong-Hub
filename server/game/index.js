@@ -1,5 +1,6 @@
 const Matter = require('matter-js');
 const Player = require('./Player.js');
+const stateMachine = require('./stateMachine.js');
 
 const { Engine, World, Bodies } = Matter;
 
@@ -22,6 +23,9 @@ World.add(engine.world, walls);
 const players = {};
 
 const gameState = {
+  get state() {
+    return stateMachine.getGameState();
+  },
   lastUpdatedTime: performance.now(),
   deltaTime: 0, // in seconds
 };
@@ -52,12 +56,10 @@ const getGameData = () => {
 };
 
 /**
- * @param {import('../packets').PlayerMovementPacket} packet
+ * @param {import('../packets/index.js').PlayerMovementPacket} packet
  */
 const onPlayerMovementPacket = (packet) => {
-  const {
-    playerId, w, s, a, d,
-  } = packet;
+  const { playerId, w, s, a, d } = packet;
   const player = players[playerId];
   const accDir = { x: 0, y: 0 };
   if (player) {
