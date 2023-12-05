@@ -22,7 +22,15 @@ class GameWindow extends React.Component {
     const gameWindow = this;
     // Create the Phaser game instance
     this.game = new Phaser.Game({
-      type: Phaser.AUTO,
+      // Force the use of Canvas API, because there are nuances between the render types.
+      // For example, Graphics#save and Graphics#restore only care about the matrix
+      // state (translate, rotate, scale, etc), not the entire state of the rendering
+      // context like Canvas does. In that case, we must keep track of the fillStyle
+      // and other properties ourselves.
+      // Honestly, I'm not sure why Phaser doesn't do that for us.
+      // But this is why I use Canvas API - for ease of use.
+      // And because this is a mini game, I don't need the performance boost of WebGL.
+      type: Phaser.CANVAS,
       parent: 'game-window',
       width: 800,
       height: 600,
@@ -108,8 +116,6 @@ class GameWindow extends React.Component {
       this.waitingText.setVisible(false);
     }
     // Always draw the players and walls
-    // FIXME: The walls will be drawn using player's color,
-    // but I already use save() and restore() here. IDK why.
     this.graphics.save();
     Object.values(this.state.players).forEach((playerData) => {
       if (playerData.team === 'RED') {
@@ -122,7 +128,7 @@ class GameWindow extends React.Component {
       utils.drawMatterBody(this.graphics, playerData);
     });
     this.graphics.restore();
-    Object.values(this.state.walls).forEach((wall) => {
+    this.state.walls.forEach((wall) => {
       utils.drawMatterBody(this.graphics, wall);
     });
   };

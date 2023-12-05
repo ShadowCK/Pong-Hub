@@ -15,7 +15,9 @@ const initSocketEvents = (socket) => {
   });
 
   socket.on('playerMovement', (packet) => {
-    const { w, a, s, d } = packet;
+    const {
+      w, a, s, d,
+    } = packet;
     game.onPlayerMovementPacket(new packets.PlayerMovementPacket(socket.id, w, a, s, d));
   });
 

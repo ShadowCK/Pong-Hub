@@ -39,7 +39,9 @@ const gameState = {
  * @returns
  */
 const makePlayerData = (player) => {
-  const { position, width, height, body, team } = player;
+  const {
+    position, width, height, body, team,
+  } = player;
   return {
     x: position.x,
     y: position.y,
@@ -72,7 +74,9 @@ const getGameData = () => {
  * @param {import('../packets/index.js').PlayerMovementPacket} packet
  */
 const onPlayerMovementPacket = (packet) => {
-  const { playerId, w, s, a, d } = packet;
+  const {
+    playerId, w, s, a, d,
+  } = packet;
   const player = players[playerId];
   const accDir = { x: 0, y: 0 };
   if (player) {
