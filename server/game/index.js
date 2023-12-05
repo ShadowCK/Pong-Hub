@@ -197,20 +197,13 @@ const placePlayers = (playerArr, center, spread) => {
     if (playerCount === 1) {
       // Only one player, put it at the center
       player.position = { x: centerX, y: centerY };
-    } else if (playerCount % 2 === 0) {
-      // Even number of players
+    } else {
+      // Evenly spread players
       player.position = {
         x: centerX - spreadX + (spreadX * 2 * index) / (playerCount - 1),
         y: centerY - spreadY + (spreadY * 2 * index) / (playerCount - 1),
       };
-    } else {
-      // Odd number of players
-      player.position = {
-        x: centerX - spreadX + (spreadX * 2 * index) / playerCount,
-        y: centerY - spreadY + (spreadY * 2 * index) / playerCount,
-      };
     }
-    console.log(player.position);
   });
 };
 
