@@ -16,6 +16,7 @@ class GameWindow extends React.Component {
       gameState: {},
       walls: [],
       ball: null,
+      goals: [],
     };
   }
 
@@ -78,6 +79,7 @@ class GameWindow extends React.Component {
         gameState: gameData.gameState,
         walls: gameData.walls,
         ball: gameData.ball,
+        goals: gameData.goals,
       });
     });
     // Create graphics object
@@ -117,21 +119,21 @@ class GameWindow extends React.Component {
     } else {
       this.waitingText.setVisible(false);
     }
-    // Always draw the players and walls
-    Object.values(this.state.players).forEach((playerData) => {
-      if (playerData.team === 'RED') {
-        this.graphics.fillStyle(0xff0000);
-      } else if (playerData.team === 'BLUE') {
-        this.graphics.fillStyle(0x0000ff);
+    // Draw goals
+    Object.values(this.state.goals).forEach((goal) => {
+      if (goal.team === 'RED') {
+        this.graphics.fillStyle(0xffeae8);
       } else {
-        this.graphics.fillStyle(0x000000);
+        this.graphics.fillStyle(0xe8fffe);
       }
-      utils.drawMatterBody(this.graphics, playerData);
+      utils.drawMatterBody(this.graphics, goal);
     });
+    // Draw walls
     this.graphics.fillStyle(0x000000);
     this.state.walls.forEach((wall) => {
       utils.drawMatterBody(this.graphics, wall);
     });
+    // Draw ball
     if (this.state.ball) {
       console.log(
         'lets gooo',
@@ -146,6 +148,17 @@ class GameWindow extends React.Component {
         this.state.ball.circleRadius,
       );
     }
+    // Draw players
+    Object.values(this.state.players).forEach((playerData) => {
+      if (playerData.team === 'RED') {
+        this.graphics.fillStyle(0xff0000);
+      } else if (playerData.team === 'BLUE') {
+        this.graphics.fillStyle(0x0000ff);
+      } else {
+        this.graphics.fillStyle(0x000000);
+      }
+      utils.drawMatterBody(this.graphics, playerData);
+    });
   };
 
   render() {

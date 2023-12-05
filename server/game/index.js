@@ -18,6 +18,12 @@ const walls = [
 ];
 // Add walls to the game world
 World.add(engine.world, walls);
+const goalOptions = { isStatic: true, isSensor: true };
+const goals = [
+  Bodies.rectangle(25, 300, 50, 600, { ...goalOptions, team: 'RED' }),
+  Bodies.rectangle(775, 300, 50, 600, { ...goalOptions, team: 'BLUE' }),
+];
+World.add(engine.world, goals);
 
 /** @type {{ [playerId: string]: Player }} */
 const players = {};
@@ -75,11 +81,20 @@ const getGameData = () => {
       circleRadius: ball.circleRadius,
     };
   }
+  const _goals = goals.map((goal) => ({
+    position: goal.position,
+    x: goal.position.x,
+    y: goal.position.y,
+    width: goal.bounds.max.x - goal.bounds.min.x,
+    height: goal.bounds.max.y - goal.bounds.min.y,
+    team: goal.team,
+  }));
   return {
     gameState,
     players: playerDatas,
     walls: _walls,
     ball: _ball,
+    goals: _goals,
   };
 };
 
