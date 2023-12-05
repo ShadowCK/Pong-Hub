@@ -1,6 +1,6 @@
 const Matter = require('matter-js');
 const Player = require('./Player.js');
-const stateMachine = require('./stateMachine.js');
+const { states, getGameState, setGameState } = require('./stateMachine.js');
 
 const { Engine, World, Bodies } = Matter;
 
@@ -28,7 +28,7 @@ const blueTeamPlayers = [];
 
 const gameState = {
   get state() {
-    return stateMachine.getGameState();
+    return getGameState();
   },
   lastUpdatedTime: performance.now(),
   deltaTime: 0, // in seconds
@@ -124,9 +124,29 @@ const addPlayer = (playerId, x, y, width, height) => {
   return player;
 };
 
+const stopPlayerPlaying = (player) => {
+  if (gameState.state !== states.IN_GAME) {
+    console.warn('Player is not playing!');
+    return;
+  }
+  if (player.team === 'RED') {
+    const index = redTeamPlayers.indexOf(player);
+    if (index !== -1) {
+      redTeamPlayers.splice(index, 1);
+    }
+  } else if (player.team === 'BLUE') {
+    const index = blueTeamPlayers.indexOf(player);
+    if (index !== -1) {
+      blueTeamPlayers.splice(index, 1);
+    }
+  }
+};
+
 const removePlayer = (playerId) => {
   if (players[playerId]) {
-    World.remove(engine.world, players[playerId].body);
+    const player = players[playerId];
+    stopPlayerPlaying(player);
+    World.remove(engine.world, player.body);
     delete players[playerId];
   }
 };
@@ -155,6 +175,7 @@ const handleGameEnd = () => {
 
 const balanceTeams = () => {
   let diff = redTeamPlayers.length - blueTeamPlayers.length;
+  console.log(`Red Team has ${diff} more players than Blue Team`);
   if (Math.abs(diff) <= 1) {
     // No need to balance
     return;
@@ -176,15 +197,19 @@ const balanceTeams = () => {
       diff += 2;
     }
   }
+  console.log('Teams balanced!');
+  console.log('Red Team Players:', redTeamPlayers);
+  console.log('Blue Team Players:', blueTeamPlayers);
 };
 
 const onPlayerJoin = (socket) => {
   const player = addPlayer(socket.id, 100, 100, 20, 100);
   // Start game if there are at least 2 players
-  if (stateMachine.getGameState() === 'LOBBY' && Object.keys(players).length >= 2) {
-    stateMachine.setGameState('IN_GAME');
+  const currentState = getGameState();
+  if (currentState === states.LOBBY && Object.keys(players).length >= 2) {
+    setGameState(states.IN_GAME);
     handleGameStart();
-  } else if (stateMachine.getGameState() === 'IN_GAME') {
+  } else if (currentState === 'IN_GAME') {
     // Add player to the team with less players
     if (redTeamPlayers.length > blueTeamPlayers.length) {
       player.setTeam('BLUE');
@@ -199,7 +224,7 @@ const onPlayerJoin = (socket) => {
 const onPlayerLeave = (socket) => {
   removePlayer(socket.id);
   if (Object.keys(players).length < 2) {
-    stateMachine.setGameState('LOBBY');
+    setGameState('LOBBY');
     handleGameEnd();
   } else {
     balanceTeams();
