@@ -12,6 +12,15 @@ const matterToPhaser = ({ x, y, width, height, angle = 0 }) => ({
   angle,
 });
 
+const drawMatterBody = (graphics, bodyData) => {
+  const { x, y, width, height, angle } = matterToPhaser(bodyData);
+  graphics.save();
+  graphics.translateCanvas(x + width / 2, y + height / 2);
+  graphics.rotateCanvas(angle);
+  graphics.fillRect(-width / 2, -height / 2, width, height);
+  graphics.restore();
+};
+
 class GameWindow extends React.Component {
   /** @type {Phaser.GameObjects.Graphics} */
   graphics;
@@ -102,12 +111,7 @@ class GameWindow extends React.Component {
 
     this.graphics.clear();
     Object.values(this.state.players).forEach((playerData) => {
-      const { x, y, width, height, angle } = matterToPhaser(playerData);
-      this.graphics.save();
-      this.graphics.translateCanvas(x + width / 2, y + height / 2);
-      this.graphics.rotateCanvas(angle);
-      this.graphics.fillRect(-width / 2, -height / 2, width, height);
-      this.graphics.restore();
+      drawMatterBody(this.graphics, playerData);
     });
     Object.values(this.state.walls).forEach((wall) => {
       this.graphics.fillRect(...Object.values(matterToPhaser(wall)));
