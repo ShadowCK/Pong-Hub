@@ -250,6 +250,7 @@ const endGame = () => {
   });
   // Remove ball from game
   World.remove(engine.world, ball);
+  ball = null;
 };
 
 const balanceTeams = () => {
