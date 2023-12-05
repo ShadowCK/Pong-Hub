@@ -53,9 +53,19 @@ const signup = async (req, res) => {
   }
 };
 
+const getInfo = (req, res) => {
+  if (!req.session.account) {
+    // mid.requiresLogin ensures user is logged in.
+    // If this occurs, something is wrong with the server.
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+  return res.status(200).json({ username: req.session.account.username });
+};
+
 module.exports = {
   loginPage,
   login,
   logout,
   signup,
+  getInfo,
 };

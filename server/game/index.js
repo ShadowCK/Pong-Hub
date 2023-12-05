@@ -48,7 +48,9 @@ const gameState = {
  * @returns
  */
 const makePlayerData = (player) => {
-  const { position, width, height, body, team } = player;
+  const {
+    position, width, height, body, team,
+  } = player;
   return {
     position,
     x: position.x,
@@ -102,7 +104,9 @@ const getGameData = () => {
  * @param {import('../packets/index.js').PlayerMovementPacket} packet
  */
 const onPlayerMovementPacket = (packet) => {
-  const { playerId, w, s, a, d } = packet;
+  const {
+    playerId, w, s, a, d,
+  } = packet;
   const player = players[playerId];
   const accDir = { x: 0, y: 0 };
   if (player) {
@@ -249,8 +253,10 @@ const endGame = () => {
     player.setTeam(null);
   });
   // Remove ball from game
-  World.remove(engine.world, ball);
-  ball = null;
+  if (ball) {
+    World.remove(engine.world, ball);
+    ball = null;
+  }
 };
 
 const balanceTeams = () => {

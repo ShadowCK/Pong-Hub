@@ -10,6 +10,8 @@ const router = (app) => {
   app.get('/logout', mid.requiresLogin, controllers.Account.logout);
 
   app.get('/', mid.requiresSecure, mid.requiresLogout, controllers.Account.loginPage);
+
+  app.get('/api/user/info', mid.requiresLogin, controllers.Account.getInfo);
 };
 
 module.exports = router;

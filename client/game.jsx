@@ -164,6 +164,11 @@ class GameWindow extends React.Component {
 
 const init = () => {
   ReactDOM.render(<GameWindow />, document.getElementById('content'));
+  fetch('/api/user/info')
+    .then((res) => res.json())
+    .then((info) => {
+      document.getElementById('navbar-username').textContent = info.username;
+    });
 };
 
 window.onload = init;
