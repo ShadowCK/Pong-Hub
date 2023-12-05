@@ -15,6 +15,7 @@ class GameWindow extends React.Component {
       players: {},
       gameState: {},
       walls: [],
+      ball: null,
     };
   }
 
@@ -76,6 +77,7 @@ class GameWindow extends React.Component {
         players: gameData.players,
         gameState: gameData.gameState,
         walls: gameData.walls,
+        ball: gameData.ball,
       });
     });
     // Create graphics object
@@ -116,7 +118,6 @@ class GameWindow extends React.Component {
       this.waitingText.setVisible(false);
     }
     // Always draw the players and walls
-    this.graphics.save();
     Object.values(this.state.players).forEach((playerData) => {
       if (playerData.team === 'RED') {
         this.graphics.fillStyle(0xff0000);
@@ -127,10 +128,24 @@ class GameWindow extends React.Component {
       }
       utils.drawMatterBody(this.graphics, playerData);
     });
-    this.graphics.restore();
+    this.graphics.fillStyle(0x000000);
     this.state.walls.forEach((wall) => {
       utils.drawMatterBody(this.graphics, wall);
     });
+    if (this.state.ball) {
+      console.log(
+        'lets gooo',
+        this.state.ball.position.x,
+        this.state.ball.position.y,
+        this.state.ball.circleRadius,
+      );
+      this.graphics.fillStyle(0x000000);
+      this.graphics.fillCircle(
+        this.state.ball.position.x,
+        this.state.ball.position.y,
+        this.state.ball.circleRadius,
+      );
+    }
   };
 
   render() {

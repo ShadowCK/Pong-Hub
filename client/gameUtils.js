@@ -28,9 +28,10 @@ const matterToPhaser = ({ x, y, width, height, angle = 0 }) => ({
 
 /**
  * @param {Phaser.GameObjects.Graphics} graphics
- * @param {Object} bodyData
+ * @param {Matter.Body} body
  */
 const drawMatterBody = (graphics, bodyData) => {
+  // TODO: Make this support both circle and rectangle bodies, and even polygons
   const { x, y, width, height, angle } = matterToPhaser(bodyData);
   graphics.save();
   graphics.translateCanvas(x + width / 2, y + height / 2);
@@ -39,4 +40,10 @@ const drawMatterBody = (graphics, bodyData) => {
   graphics.restore();
 };
 
-module.exports = { getMainCamera, centerGameObject, drawMatterBody };
+const safeDraw = (graphics, callback) => {
+  graphics.save();
+  callback(graphics);
+  graphics.restore();
+};
+
+module.exports = { getMainCamera, centerGameObject, drawMatterBody, safeDraw };

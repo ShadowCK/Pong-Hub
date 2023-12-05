@@ -25,6 +25,7 @@ const players = {};
 const redTeamPlayers = [];
 /** @type {Player[]} */
 const blueTeamPlayers = [];
+let ball = null;
 
 const gameState = {
   get state() {
@@ -43,6 +44,7 @@ const makePlayerData = (player) => {
     position, width, height, body, team,
   } = player;
   return {
+    position,
     x: position.x,
     y: position.y,
     width,
@@ -58,15 +60,26 @@ const getGameData = () => {
     return acc;
   }, {});
   const _walls = walls.map((wall) => ({
+    position: wall.position,
     x: wall.position.x,
     y: wall.position.y,
     width: wall.bounds.max.x - wall.bounds.min.x,
     height: wall.bounds.max.y - wall.bounds.min.y,
   }));
+  let _ball = null;
+  if (ball != null) {
+    _ball = {
+      position: ball.position,
+      x: ball.position.x,
+      y: ball.position.y,
+      circleRadius: ball.circleRadius,
+    };
+  }
   return {
-    players: playerDatas,
     gameState,
+    players: playerDatas,
     walls: _walls,
+    ball: _ball,
   };
 };
 
@@ -151,8 +164,20 @@ const removePlayer = (playerId) => {
   }
 };
 
-const handleGameStart = () => {
+const startGame = () => {
   console.log('Game started!');
+  // Add a ball to the game world
+  ball = Bodies.circle(400, 300, 10, {
+    restitution: 0.8,
+    // TODO: setting this to smaller than 0.001 somehow does not
+    // have any more visual effect on its speed after being hit
+    density: 0.0001,
+    friction: 0.01,
+    frictionAir: 0.001,
+    frictionStatic: 0.1,
+  });
+  console.log(ball);
+  World.add(engine.world, ball);
   // Assign players to teams
   Object.values(players).forEach((player, index) => {
     if (index % 2 === 0) {
@@ -165,12 +190,15 @@ const handleGameStart = () => {
   });
 };
 
-const handleGameEnd = () => {
+const endGame = () => {
   console.log('Game ended!');
-  // Assign players to teams
+  // Remove current players from teams
+  redTeamPlayers.length = 0;
+  blueTeamPlayers.length = 0;
   Object.values(players).forEach((player) => {
     player.setTeam(null);
   });
+  World.remove(engine.world, ball);
 };
 
 const balanceTeams = () => {
@@ -208,7 +236,7 @@ const onPlayerJoin = (socket) => {
   const currentState = getGameState();
   if (currentState === states.LOBBY && Object.keys(players).length >= 2) {
     setGameState(states.IN_GAME);
-    handleGameStart();
+    startGame();
   } else if (currentState === 'IN_GAME') {
     // Add player to the team with less players
     if (redTeamPlayers.length > blueTeamPlayers.length) {
@@ -225,7 +253,7 @@ const onPlayerLeave = (socket) => {
   removePlayer(socket.id);
   if (Object.keys(players).length < 2) {
     setGameState('LOBBY');
-    handleGameEnd();
+    endGame();
   } else {
     balanceTeams();
   }
