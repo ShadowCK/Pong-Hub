@@ -1,21 +1,16 @@
 const React = require('react');
 const ReactDOM = require('react-dom');
 const Phaser = require('phaser');
-const helper = require('./helper.js');
 
 const socket = io();
 
-function matterToPhaser(matterX, matterY, width, height) {
-  const phaserX = matterX - width / 2;
-  const phaserY = matterY - height / 2;
-
-  return {
-    x: phaserX,
-    y: phaserY,
-    width,
-    height,
-  };
-}
+const matterToPhaser = ({ x, y, width, height, angle = 0 }) => ({
+  x: x - width / 2,
+  y: y - height / 2,
+  width,
+  height,
+  angle,
+});
 
 class GameWindow extends React.Component {
   /** @type {Phaser.GameObjects.Graphics} */
@@ -106,15 +101,16 @@ class GameWindow extends React.Component {
     socket.emit('playerMovement', movement);
 
     this.graphics.clear();
-    Object.values(this.state.players).forEach((player) => {
-      this.graphics.fillRect(
-        ...Object.values(matterToPhaser(player.x, player.y, player.width, player.height)),
-      );
+    Object.values(this.state.players).forEach((playerData) => {
+      const { x, y, width, height, angle } = matterToPhaser(playerData);
+      this.graphics.save();
+      this.graphics.translateCanvas(x + width / 2, y + height / 2);
+      this.graphics.rotateCanvas(angle);
+      this.graphics.fillRect(-width / 2, -height / 2, width, height);
+      this.graphics.restore();
     });
     Object.values(this.state.walls).forEach((wall) => {
-      this.graphics.fillRect(
-        ...Object.values(matterToPhaser(wall.x, wall.y, wall.width, wall.height)),
-      );
+      this.graphics.fillRect(...Object.values(matterToPhaser(wall)));
     });
   };
 

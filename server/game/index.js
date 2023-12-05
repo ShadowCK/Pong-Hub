@@ -28,12 +28,13 @@ const gameState = {
 
 const getGameData = () => {
   const _players = Object.entries(players).reduce((acc, [id, player]) => {
-    const { position } = player;
+    const { position, width, height } = player;
     acc[id] = {
       x: position.x,
       y: position.y,
-      width: player.width,
-      height: player.height,
+      width,
+      height,
+      angle: player.body.angle,
     };
     return acc;
   }, {});
@@ -54,7 +55,9 @@ const getGameData = () => {
  * @param {import('../packets').PlayerMovementPacket} packet
  */
 const onPlayerMovementPacket = (packet) => {
-  const { playerId, w, s, a, d } = packet;
+  const {
+    playerId, w, s, a, d,
+  } = packet;
   const player = players[playerId];
   const accDir = { x: 0, y: 0 };
   if (player) {
@@ -93,7 +96,6 @@ const gameLoop = () => {
     Engine.update(engine, deltaTimeMs / physicsUpdateIterations);
   }
   gameState.lastUpdatedTime = currentTime;
-  console.log(walls[0]);
 };
 
 const addPlayer = (playerId, x, y, width, height) => {
