@@ -32,6 +32,8 @@ const redTeamPlayers = [];
 /** @type {Player[]} */
 const blueTeamPlayers = [];
 let ball = null;
+const redTeamCenter = { x: 200, y: 300 };
+const blueTeamCenter = { x: 600, y: 300 };
 
 const gameState = {
   get state() {
@@ -46,9 +48,7 @@ const gameState = {
  * @returns
  */
 const makePlayerData = (player) => {
-  const {
-    position, width, height, body, team,
-  } = player;
+  const { position, width, height, body, team } = player;
   return {
     position,
     x: position.x,
@@ -102,9 +102,7 @@ const getGameData = () => {
  * @param {import('../packets/index.js').PlayerMovementPacket} packet
  */
 const onPlayerMovementPacket = (packet) => {
-  const {
-    playerId, w, s, a, d,
-  } = packet;
+  const { playerId, w, s, a, d } = packet;
   const player = players[playerId];
   const accDir = { x: 0, y: 0 };
   if (player) {
@@ -179,6 +177,39 @@ const removePlayer = (playerId) => {
   }
 };
 
+/**
+ * @param {Player[]} playerArr
+ * @param {{x:number,y:number}} center
+ * @param {{x:number,y:number}} spread
+ */
+const placePlayers = (playerArr, center, spread) => {
+  const centerX = center.x;
+  const centerY = center.y;
+  const spreadX = spread.x;
+  const spreadY = spread.y;
+  const playerCount = playerArr.length;
+  playerArr.forEach((element, index) => {
+    const player = element;
+    if (playerCount === 1) {
+      // Only one player, put it at the center
+      player.position = { x: centerX, y: centerY };
+    } else if (playerCount % 2 === 0) {
+      // Even number of players
+      player.position = {
+        x: centerX - spreadX + (spreadX * 2 * index) / (playerCount - 1),
+        y: centerY - spreadY + (spreadY * 2 * index) / (playerCount - 1),
+      };
+    } else {
+      // Odd number of players
+      player.position = {
+        x: centerX - spreadX + (spreadX * 2 * index) / playerCount,
+        y: centerY - spreadY + (spreadY * 2 * index) / playerCount,
+      };
+    }
+    console.log(player.position);
+  });
+};
+
 const startGame = () => {
   console.log('Game started!');
   // Add a ball to the game world
@@ -204,41 +235,7 @@ const startGame = () => {
     }
   });
 
-  /**
-   * @param {Player[]} playerArr
-   * @param {{x:number,y:number}} center
-   * @param {{x:number,y:number}} spread
-   */
-  const placePlayers = (playerArr, center, spread) => {
-    const centerX = center.x;
-    const centerY = center.y;
-    const spreadX = spread.x;
-    const spreadY = spread.y;
-    const playerCount = playerArr.length;
-    playerArr.forEach((element, index) => {
-      const player = element;
-      if (playerCount === 1) {
-        // Only one player, put it at the center
-        player.position = { x: centerX, y: centerY };
-      } else if (playerCount % 2 === 0) {
-        // Even number of players
-        player.position = {
-          x: centerX - spreadX + (spreadX * 2 * index) / (playerCount - 1),
-          y: centerY - spreadY + (spreadY * 2 * index) / (playerCount - 1),
-        };
-      } else {
-        // Odd number of players
-        player.position = {
-          x: centerX - spreadX + (spreadX * 2 * index) / playerCount,
-          y: centerY - spreadY + (spreadY * 2 * index) / playerCount,
-        };
-      }
-      console.log(player.position);
-    });
-  };
   // Place players in their respective positions
-  const redTeamCenter = { x: 200, y: 300 };
-  const blueTeamCenter = { x: 600, y: 300 };
   placePlayers(redTeamPlayers, redTeamCenter, { x: 0, y: 200 });
   placePlayers(blueTeamPlayers, blueTeamCenter, { x: 0, y: 200 });
 };
@@ -296,9 +293,11 @@ const onPlayerJoin = (socket) => {
     if (redTeamPlayers.length > blueTeamPlayers.length) {
       player.setTeam('BLUE');
       blueTeamPlayers.push(player);
+      player.position = blueTeamCenter;
     } else {
       player.setTeam('RED');
       redTeamPlayers.push(player);
+      player.position = redTeamCenter;
     }
   }
 };
