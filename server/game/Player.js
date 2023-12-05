@@ -15,6 +15,8 @@ class Player {
 
   acceleration = 800 / 60;
 
+  team = null;
+
   constructor(id, x, y, width, height) {
     this.id = id;
     this.width = width;
@@ -62,6 +64,10 @@ class Player {
 
   set velocity(vector) {
     Matter.Body.setVelocity(this.body, vector);
+  }
+
+  setTeam(team) {
+    this.team = team;
   }
 
   /**

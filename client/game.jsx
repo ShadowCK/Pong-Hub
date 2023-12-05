@@ -53,6 +53,7 @@ class GameWindow extends React.Component {
   }
 
   /**
+   * Load assets here
    * @param {Phaser.Scene} scene
    */
   preload = (scene) => {};
@@ -107,9 +108,20 @@ class GameWindow extends React.Component {
       this.waitingText.setVisible(false);
     }
     // Always draw the players and walls
+    // FIXME: The walls will be drawn using player's color,
+    // but I already use save() and restore() here. IDK why.
+    this.graphics.save();
     Object.values(this.state.players).forEach((playerData) => {
+      if (playerData.team === 'RED') {
+        this.graphics.fillStyle(0xff0000);
+      } else if (playerData.team === 'BLUE') {
+        this.graphics.fillStyle(0x0000ff);
+      } else {
+        this.graphics.fillStyle(0x000000);
+      }
       utils.drawMatterBody(this.graphics, playerData);
     });
+    this.graphics.restore();
     Object.values(this.state.walls).forEach((wall) => {
       utils.drawMatterBody(this.graphics, wall);
     });

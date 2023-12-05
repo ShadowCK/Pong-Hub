@@ -1,30 +1,25 @@
 // Setup socket IO
 const http = require('http');
 const { Server } = require('socket.io');
-const gameLogic = require('./game');
+const game = require('./game');
 const packets = require('./packets');
 
 let io;
 
 const initSocketEvents = (socket) => {
-  console.log('a user connected');
-
-  // Add player to game
-  gameLogic.addPlayer(socket.id, 100, 100, 20, 100);
+  game.onPlayerJoin(socket);
 
   socket.on('disconnect', () => {
     console.log('a user disconnected');
-    gameLogic.removePlayer(socket.id);
+    game.onPlayerLeave(socket);
   });
 
   socket.on('playerMovement', (packet) => {
-    const {
-      w, a, s, d,
-    } = packet;
-    gameLogic.onPlayerMovementPacket(new packets.PlayerMovementPacket(socket.id, w, a, s, d));
+    const { w, a, s, d } = packet;
+    game.onPlayerMovementPacket(new packets.PlayerMovementPacket(socket.id, w, a, s, d));
   });
 
-  const gameData = gameLogic.getGameData();
+  const gameData = game.getGameData();
   // Initial game update to the client
   socket.emit('gameUpdate', gameData);
   console.log(gameData);
@@ -36,12 +31,13 @@ const socketSetup = (app) => {
   const server = http.createServer(app);
   io = new Server(server);
   io.on('connection', (socket) => {
+    console.log('a user connected');
     initSocketEvents(socket);
   });
 
   setInterval(() => {
-    gameLogic.gameLoop();
-    io.emit('gameUpdate', gameLogic.getGameData());
+    game.gameLoop();
+    io.emit('gameUpdate', game.getGameData());
   }, 1000 / 60);
   return server;
 };

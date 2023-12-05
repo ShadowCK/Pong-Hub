@@ -21,6 +21,10 @@ World.add(engine.world, walls);
 
 /** @type {{ [playerId: string]: Player }} */
 const players = {};
+/** @type {Player[]} */
+const redTeamPlayers = [];
+/** @type {Player[]} */
+const blueTeamPlayers = [];
 
 const gameState = {
   get state() {
@@ -30,16 +34,25 @@ const gameState = {
   deltaTime: 0, // in seconds
 };
 
+/**
+ * @param {Player} player
+ * @returns
+ */
+const makePlayerData = (player) => {
+  const { position, width, height, body, team } = player;
+  return {
+    x: position.x,
+    y: position.y,
+    width,
+    height,
+    angle: body.angle,
+    team,
+  };
+};
+
 const getGameData = () => {
-  const _players = Object.entries(players).reduce((acc, [id, player]) => {
-    const { position, width, height } = player;
-    acc[id] = {
-      x: position.x,
-      y: position.y,
-      width,
-      height,
-      angle: player.body.angle,
-    };
+  const playerDatas = Object.entries(players).reduce((acc, [id, player]) => {
+    acc[id] = makePlayerData(player);
     return acc;
   }, {});
   const _walls = walls.map((wall) => ({
@@ -49,7 +62,7 @@ const getGameData = () => {
     height: wall.bounds.max.y - wall.bounds.min.y,
   }));
   return {
-    players: _players,
+    players: playerDatas,
     gameState,
     walls: _walls,
   };
@@ -113,10 +126,55 @@ const removePlayer = (playerId) => {
   }
 };
 
+const handleGameStart = () => {
+  console.log('Game started!');
+  // Assign players to teams
+  Object.values(players).forEach((player, index) => {
+    if (index % 2 === 0) {
+      player.setTeam('RED');
+      redTeamPlayers.push(player);
+    } else {
+      player.setTeam('BLUE');
+      blueTeamPlayers.push(player);
+    }
+  });
+};
+
+const handleGameEnd = () => {
+  console.log('Game ended!');
+  // Assign players to teams
+  Object.values(players).forEach((player) => {
+    player.setTeam(null);
+  });
+};
+
+const onPlayerJoin = (socket) => {
+  addPlayer(socket.id, 100, 100, 20, 100);
+  // Start game if there are at least 2 players
+  if (stateMachine.getGameState() === 'LOBBY' && Object.keys(players).length >= 2) {
+    stateMachine.setGameState('IN_GAME');
+    handleGameStart();
+  } else if (stateMachine.getGameState() === 'IN_GAME') {
+    // TODO: Add player to one team
+  }
+};
+
+const onPlayerLeave = (socket) => {
+  removePlayer(socket.id);
+  if (Object.keys(players).length < 2) {
+    stateMachine.setGameState('LOBBY');
+    handleGameEnd();
+  } else {
+    // TODO: Balance player number
+  }
+};
+
 module.exports = {
   onPlayerMovementPacket,
   gameLoop,
   addPlayer,
   removePlayer,
   getGameData,
+  onPlayerJoin,
+  onPlayerLeave,
 };
