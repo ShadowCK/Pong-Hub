@@ -21,12 +21,15 @@ class Player {
     this.id = id;
     this.width = width;
     this.height = height;
-    this.body = Matter.Bodies.rectangle(x, y, width, height);
-    // High speed low drag!
-    this.body.frictionAir = 0.004;
-    this.body.friction = 0.04;
-    this.body.frictionStatic = 0.1;
-    this.body.restitution = 0.5;
+    this.body = Matter.Bodies.rectangle(x, y, width, height, {
+      inertia: Infinity, // This will prevent rotation
+      frictionAir: 0.004,
+      // Now that inertia is Infinity, 100% of friction slows down
+      // the player (instead of rotating it) - we don't want that.
+      friction: 0,
+      frictionStatic: 0,
+      restitution: 0.1,
+    });
   }
 
   get position() {

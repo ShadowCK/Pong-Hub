@@ -135,12 +135,6 @@ class GameWindow extends React.Component {
     });
     // Draw ball
     if (this.state.ball) {
-      console.log(
-        'lets gooo',
-        this.state.ball.position.x,
-        this.state.ball.position.y,
-        this.state.ball.circleRadius,
-      );
       this.graphics.fillStyle(0x000000);
       this.graphics.fillCircle(
         this.state.ball.position.x,

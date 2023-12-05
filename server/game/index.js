@@ -183,10 +183,10 @@ const startGame = () => {
   console.log('Game started!');
   // Add a ball to the game world
   ball = Bodies.circle(400, 300, 10, {
-    restitution: 0.8,
+    restitution: 0.9,
     // TODO: setting this to smaller than 0.001 somehow does not
     // have any more visual effect on its speed after being hit
-    density: 0.0001,
+    density: 0.0005,
     friction: 0.01,
     frictionAir: 0.001,
     frictionStatic: 0.1,
@@ -203,6 +203,44 @@ const startGame = () => {
       blueTeamPlayers.push(player);
     }
   });
+
+  /**
+   * @param {Player[]} playerArr
+   * @param {{x:number,y:number}} center
+   * @param {{x:number,y:number}} spread
+   */
+  const placePlayers = (playerArr, center, spread) => {
+    const centerX = center.x;
+    const centerY = center.y;
+    const spreadX = spread.x;
+    const spreadY = spread.y;
+    const playerCount = playerArr.length;
+    playerArr.forEach((element, index) => {
+      const player = element;
+      if (playerCount === 1) {
+        // Only one player, put it at the center
+        player.position = { x: centerX, y: centerY };
+      } else if (playerCount % 2 === 0) {
+        // Even number of players
+        player.position = {
+          x: centerX - spreadX + (spreadX * 2 * index) / (playerCount - 1),
+          y: centerY - spreadY + (spreadY * 2 * index) / (playerCount - 1),
+        };
+      } else {
+        // Odd number of players
+        player.position = {
+          x: centerX - spreadX + (spreadX * 2 * index) / playerCount,
+          y: centerY - spreadY + (spreadY * 2 * index) / playerCount,
+        };
+      }
+      console.log(player.position);
+    });
+  };
+  // Place players in their respective positions
+  const redTeamCenter = { x: 200, y: 300 };
+  const blueTeamCenter = { x: 600, y: 300 };
+  placePlayers(redTeamPlayers, redTeamCenter, { x: 0, y: 200 });
+  placePlayers(blueTeamPlayers, blueTeamCenter, { x: 0, y: 200 });
 };
 
 const endGame = () => {
@@ -213,6 +251,7 @@ const endGame = () => {
   Object.values(players).forEach((player) => {
     player.setTeam(null);
   });
+  // Remove ball from game
   World.remove(engine.world, ball);
 };
 
