@@ -121,6 +121,7 @@ const addPlayer = (playerId, x, y, width, height) => {
   const player = new Player(playerId, x, y, width, height);
   players[playerId] = player;
   World.add(engine.world, player.body);
+  return player;
 };
 
 const removePlayer = (playerId) => {
@@ -152,14 +153,46 @@ const handleGameEnd = () => {
   });
 };
 
+const balanceTeams = () => {
+  let diff = redTeamPlayers.length - blueTeamPlayers.length;
+  if (Math.abs(diff) <= 1) {
+    // No need to balance
+    return;
+  }
+  if (Math.sign(diff) === 1) {
+    // Red team has more than 2 players than blue team
+    while (diff > 1) {
+      const player = redTeamPlayers.pop();
+      player.setTeam('BLUE');
+      blueTeamPlayers.push(player);
+      diff -= 2;
+    }
+  } else {
+    // Blue team has more than 2 players than red team
+    while (diff < -1) {
+      const player = blueTeamPlayers.pop();
+      player.setTeam('RED');
+      redTeamPlayers.push(player);
+      diff += 2;
+    }
+  }
+};
+
 const onPlayerJoin = (socket) => {
-  addPlayer(socket.id, 100, 100, 20, 100);
+  const player = addPlayer(socket.id, 100, 100, 20, 100);
   // Start game if there are at least 2 players
   if (stateMachine.getGameState() === 'LOBBY' && Object.keys(players).length >= 2) {
     stateMachine.setGameState('IN_GAME');
     handleGameStart();
   } else if (stateMachine.getGameState() === 'IN_GAME') {
-    // TODO: Add player to one team
+    // Add player to the team with less players
+    if (redTeamPlayers.length > blueTeamPlayers.length) {
+      player.setTeam('BLUE');
+      blueTeamPlayers.push(player);
+    } else {
+      player.setTeam('RED');
+      redTeamPlayers.push(player);
+    }
   }
 };
 
@@ -169,7 +202,7 @@ const onPlayerLeave = (socket) => {
     stateMachine.setGameState('LOBBY');
     handleGameEnd();
   } else {
-    // TODO: Balance player number
+    balanceTeams();
   }
 };
 

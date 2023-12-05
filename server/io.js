@@ -24,7 +24,6 @@ const initSocketEvents = (socket) => {
   const gameData = game.getGameData();
   // Initial game update to the client
   socket.emit('gameUpdate', gameData);
-  console.log(gameData);
 
   // ...Other code...
 };
