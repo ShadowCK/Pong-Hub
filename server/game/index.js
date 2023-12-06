@@ -1,4 +1,5 @@
 const Matter = require('matter-js');
+const _ = require('underscore');
 const Player = require('./Player.js');
 const { states, getGameState, setGameState } = require('./stateMachine.js');
 
@@ -48,61 +49,42 @@ const gameState = {
 };
 
 /**
+ * @param {Matter.Body} body
+ * @returns {{
+ * position: {x: number, y: number}, x: number, y: number,
+ * width: number, height: number, angle: number, circleRadius: number
+ * }}
+ */
+const makeBodyData = (body) => ({
+  ..._.pick(body, 'position', 'angle', 'circleRadius'),
+  x: body.position.x,
+  y: body.position.y,
+  width: body.bounds.max.x - body.bounds.min.x,
+  height: body.bounds.max.y - body.bounds.min.y,
+});
+
+/**
  * @param {Player} player
  * @returns
  */
 const makePlayerData = (player) => {
-  const {
-    position, width, height, body, team,
-  } = player;
+  const { body, team } = player;
   return {
-    position,
-    x: position.x,
-    y: position.y,
-    width,
-    height,
-    angle: body.angle,
+    ...makeBodyData(body),
     team,
   };
 };
 
-const getGameData = () => {
-  const playerDatas = Object.entries(players).reduce((acc, [id, player]) => {
-    acc[id] = makePlayerData(player);
-    return acc;
-  }, {});
-  const _walls = walls.map((wall) => ({
-    position: wall.position,
-    x: wall.position.x,
-    y: wall.position.y,
-    width: wall.bounds.max.x - wall.bounds.min.x,
-    height: wall.bounds.max.y - wall.bounds.min.y,
-  }));
-  let _ball = null;
-  if (ball != null) {
-    _ball = {
-      position: ball.position,
-      x: ball.position.x,
-      y: ball.position.y,
-      circleRadius: ball.circleRadius,
-    };
-  }
-  const _goals = goals.map((goal) => ({
-    position: goal.position,
-    x: goal.position.x,
-    y: goal.position.y,
-    width: goal.bounds.max.x - goal.bounds.min.x,
-    height: goal.bounds.max.y - goal.bounds.min.y,
+const getGameData = () => ({
+  gameState,
+  players: _.mapObject(players, (player) => makePlayerData(player)),
+  walls: walls.map(makeBodyData),
+  ball: ball == null ? null : makeBodyData(ball),
+  goals: goals.map((goal) => ({
+    ...makeBodyData(goal),
     team: goal.team,
-  }));
-  return {
-    gameState,
-    players: playerDatas,
-    walls: _walls,
-    ball: _ball,
-    goals: _goals,
-  };
-};
+  })),
+});
 
 /**
  * @param {import('../packets/index.js').PlayerMovementPacket} packet
