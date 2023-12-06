@@ -1,6 +1,7 @@
 const Matter = require('matter-js');
 const _ = require('underscore');
 const Player = require('./Player.js');
+const Ball = require('./Ball.js');
 const { states, getGameState, setGameState } = require('./stateMachine.js');
 
 const {
@@ -33,7 +34,7 @@ const players = {};
 const redTeamPlayers = [];
 /** @type {Player[]} */
 const blueTeamPlayers = [];
-/** @type {Matter.Body} */
+/** @type {Ball} */
 let ball = null;
 const redTeamCenter = { x: 200, y: 300 };
 const blueTeamCenter = { x: 600, y: 300 };
@@ -79,7 +80,7 @@ const getGameData = () => ({
   gameState,
   players: _.mapObject(players, (player) => makePlayerData(player)),
   walls: walls.map(makeBodyData),
-  ball: ball == null ? null : makeBodyData(ball),
+  ball: ball == null ? null : makeBodyData(ball.body),
   goals: goals.map((goal) => ({
     ...makeBodyData(goal),
     team: goal.team,
@@ -129,6 +130,15 @@ const gameLoop = () => {
   const deltaTimeMs = deltaTime * 1000; // in miliseconds
   for (let i = 0; i < physicsUpdateIterations; i += 1) {
     Engine.update(engine, deltaTimeMs / physicsUpdateIterations);
+  }
+
+  if (gameState.state === states.IN_GAME && ball) {
+    if (ball.body.speed > ball.maxSpeed) {
+      Matter.Body.setVelocity(
+        ball.body,
+        Matter.Vector.mult(ball.body.velocity, ball.maxSpeed / ball.body.speed),
+      );
+    }
   }
   gameState.lastUpdatedTime = currentTime;
 };
@@ -198,7 +208,7 @@ const newTurn = () => {
   // Place players in their respective positions
   placePlayers(redTeamPlayers, redTeamCenter, { x: 0, y: 200 });
   placePlayers(blueTeamPlayers, blueTeamCenter, { x: 0, y: 200 });
-  Matter.Body.setPosition(ball, { x: 400, y: 300 });
+  Matter.Body.setPosition(ball.body, { x: 400, y: 300 });
   // Give a random velocity to ball
   const randomSection = Math.floor(Math.random() * 3);
   let randomAngle;
@@ -212,8 +222,8 @@ const newTurn = () => {
     // 300° to 360°
     randomAngle = (Math.PI / 3) * 5 + (Math.random() * Math.PI) / 3;
   }
-  const randomSpeed = Math.random() * 1 + 1;
-  Matter.Body.setVelocity(ball, {
+  const randomSpeed = (Math.random() * 50 + 50) / 60;
+  Matter.Body.setVelocity(ball.body, {
     x: Math.cos(randomAngle) * randomSpeed,
     y: Math.sin(randomAngle) * randomSpeed,
   });
@@ -225,17 +235,9 @@ const startGame = () => {
   gameState.blueTeamScore = 0;
   gameState.redTeamScore = 0;
   // Add a ball to the game world
-  ball = Bodies.circle(400, 300, 10, {
-    restitution: 0.9,
-    // TODO: setting this to smaller than 0.001 somehow does not
-    // have any more visual effect on its speed after being hit
-    density: 0.0005,
-    friction: 0.01,
-    frictionAir: 0.001,
-    frictionStatic: 0.1,
-  });
+  ball = new Ball(400, 300, 10);
   console.log(ball);
-  World.add(engine.world, ball);
+  World.add(engine.world, ball.body);
   // Assign players to teams
   Object.values(players).forEach((player, index) => {
     if (index % 2 === 0) {
@@ -259,7 +261,7 @@ const endGame = () => {
   });
   // Remove ball from game
   if (ball) {
-    World.remove(engine.world, ball);
+    World.remove(engine.world, ball.body);
     ball = null;
   }
 };
@@ -327,13 +329,16 @@ const onPlayerLeave = (socket) => {
 Events.on(engine, 'collisionStart', (event) => {
   event.pairs.forEach((pair) => {
     const { bodyA, bodyB } = pair;
-    if ((bodyA === ball && bodyB === redTeamGoal) || (bodyA === redTeamGoal && bodyB === ball)) {
+    if (
+      (bodyA === ball.body && bodyB === redTeamGoal)
+      || (bodyA === redTeamGoal && bodyB === ball.body)
+    ) {
       console.log('Blue team scored!');
       gameState.blueTeamScore += 1;
       newTurn();
     } else if (
-      (bodyA === ball && bodyB === blueTeamGoal)
-      || (bodyA === blueTeamGoal && bodyB === ball)
+      (bodyA === ball.body && bodyB === blueTeamGoal)
+      || (bodyA === blueTeamGoal && bodyB === ball.body)
     ) {
       console.log('Red team scored!');
       gameState.redTeamScore += 1;

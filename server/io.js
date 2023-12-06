@@ -38,6 +38,8 @@ const socketSetup = (app) => {
 
   setInterval(() => {
     game.gameLoop();
+    // TODO: This is super dirty and laggy because it spams the client and abuses network
+    // But it works for now
     io.emit('gameUpdate', game.getGameData());
   }, 1000 / 60);
   return server;
