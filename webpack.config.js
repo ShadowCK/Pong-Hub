@@ -4,6 +4,7 @@ module.exports = {
   entry: {
     game: './client/game.jsx',
     login: './client/login.jsx',
+    changePassword: './client/changePassword.jsx',
   },
   module: {
     rules: [

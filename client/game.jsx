@@ -1,6 +1,7 @@
 const React = require('react');
 const ReactDOM = require('react-dom');
 const Phaser = require('phaser');
+
 const utils = require('./gameUtils.js');
 
 const socket = io();

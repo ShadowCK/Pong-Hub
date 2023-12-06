@@ -1,5 +1,6 @@
 const handleError = (message) => {
   document.getElementById('error-msg').textContent = message;
+  document.getElementById('error-msg-container').style.display = 'block';
 };
 
 /* Sends post requests to the server using fetch. Will look for various

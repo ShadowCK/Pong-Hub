@@ -142,7 +142,7 @@ const addPlayer = (playerId, x, y, width, height) => {
 
 const stopPlayerPlaying = (player) => {
   if (gameState.state !== states.IN_GAME) {
-    console.warn('Player is not playing!');
+    console.info('Player is not playing, in-game data cleanup is skipped.');
     return;
   }
   if (player.team === 'RED') {

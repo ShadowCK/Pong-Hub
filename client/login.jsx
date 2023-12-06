@@ -1,6 +1,8 @@
 const React = require('react');
 const ReactDOM = require('react-dom');
-const helper = require('./helper.js');
+
+const { FormInput, FormButton } = require('./components.jsx');
+const utils = require('./utils.js');
 
 const handleLogin = (e) => {
   e.preventDefault();
@@ -9,11 +11,11 @@ const handleLogin = (e) => {
   const pass = e.target.querySelector('#pass').value;
 
   if (!username || !pass) {
-    helper.handleError('Username or password is empty!');
+    utils.handleError('Username or password is empty!');
     return false;
   }
 
-  helper.sendPost(e.target.action, { username, pass });
+  utils.sendPost(e.target.action, { username, pass });
 
   return false;
 };
@@ -26,62 +28,20 @@ const handleSignup = (e) => {
   const pass2 = e.target.querySelector('#pass2').value;
 
   if (!username || !pass || !pass2) {
-    helper.handleError('All fields are required!');
+    utils.handleError('All fields are required!');
     return false;
   }
 
   if (pass !== pass2) {
-    helper.handleError('Passwords do not match!');
+    utils.handleError('Passwords do not match!');
     return false;
   }
 
-  helper.sendPost(e.target.action, { username, pass, pass2 });
+  utils.sendPost(e.target.action, { username, pass, pass2 });
 
   return false;
 };
 
-const handleChangePassword = (e) => {
-  e.preventDefault();
-  helper.handleError('Not implemented yet!');
-  return false;
-
-  const oldPass = e.target.querySelector('#old-pass').value;
-  const newPass = e.target.querySelector('#new-pass').value;
-  const newPass2 = e.target.querySelector('#new-pass2').value;
-
-  if (!oldPass || !newPass || !newPass2) {
-    helper.handleError('All fields are required!');
-    return false;
-  }
-
-  if (newPass !== newPass2) {
-    helper.handleError('New passwords do not match!');
-    return false;
-  }
-
-  helper.sendPost('/changePassword', { oldPass, newPass });
-
-  return false;
-};
-
-const FormInput = ({ label, id, name = id, type, placeholder }) => (
-  <div className="field">
-    <label className="label" htmlFor={id}>
-      {label}
-    </label>
-    <div className="control">
-      <input className="input" id={id} type={type} name={name} placeholder={placeholder} />
-    </div>
-  </div>
-);
-
-const FormButton = ({ value }) => (
-  <div className="field">
-    <div className="control">
-      <input className="button is-primary" type="submit" value={value} />
-    </div>
-  </div>
-);
 const LoginWindow = () => (
   <form id="login-form" name="login-form" onSubmit={handleLogin} action="/login" method="POST">
     <FormInput label="Username:" id="username" type="text" placeholder="username" />
@@ -99,30 +59,9 @@ const SignupWindow = () => (
   </form>
 );
 
-const ChangePasswordWindow = () => (
-  <form
-    id="change-password-form"
-    name="change-password-form"
-    onSubmit={handleChangePassword}
-    action="/changePassword"
-    method="POST"
-  >
-    <FormInput label="Old Password:" id="old-pass" type="password" placeholder="old password" />
-    <FormInput label="New Password:" id="new-pass" type="password" placeholder="new password" />
-    <FormInput
-      label="Retype New Password:"
-      id="new-pass2"
-      type="password"
-      placeholder="retype new password"
-    />
-    <FormButton value="Change Password" />
-  </form>
-);
-
 const init = () => {
   const loginButton = document.getElementById('login-button');
   const signupButton = document.getElementById('signup-button');
-  const changePasswordButton = document.getElementById('change-password-button');
 
   // Register event handlers
   loginButton.addEventListener('click', () => {
@@ -132,11 +71,6 @@ const init = () => {
 
   signupButton.addEventListener('click', () => {
     ReactDOM.render(<SignupWindow />, document.getElementById('content'));
-    return false;
-  });
-
-  changePasswordButton.addEventListener('click', () => {
-    ReactDOM.render(<ChangePasswordWindow />, document.getElementById('content'));
     return false;
   });
 

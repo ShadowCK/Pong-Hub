@@ -12,6 +12,18 @@ const router = (app) => {
   app.get('/', mid.requiresSecure, mid.requiresLogout, controllers.Account.loginPage);
 
   app.get('/api/user/info', mid.requiresLogin, controllers.Account.getInfo);
+  app.get(
+    '/changePassword',
+    mid.requiresSecure,
+    mid.requiresLogin,
+    controllers.Account.changePasswordPage,
+  );
+  app.post(
+    '/changePassword',
+    mid.requiresSecure,
+    mid.requiresLogin,
+    controllers.Account.changePassword,
+  );
 };
 
 module.exports = router;
