@@ -30,7 +30,7 @@ class Player {
       frictionStatic: 0,
       restitution: 0.1,
       // High enough so that the ball can't push the player
-      density: 1,
+      density: 100,
     });
   }
 
