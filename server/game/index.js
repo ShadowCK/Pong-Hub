@@ -4,9 +4,7 @@ const Player = require('./Player.js');
 const Ball = require('./Ball.js');
 const { states, getGameState, setGameState } = require('./stateMachine.js');
 
-const {
-  Engine, World, Bodies, Events,
-} = Matter;
+const { Engine, World, Bodies, Events } = Matter;
 
 // Create Matter.js engine
 const engine = Engine.create();
@@ -91,9 +89,7 @@ const getGameData = () => ({
  * @param {import('../packets/index.js').PlayerMovementPacket} packet
  */
 const onPlayerMovementPacket = (packet) => {
-  const {
-    playerId, w, s, a, d,
-  } = packet;
+  const { playerId, w, s, a, d } = packet;
   const player = players[playerId];
   const accDir = { x: 0, y: 0 };
   if (player) {
@@ -326,23 +322,28 @@ const onPlayerLeave = (socket) => {
   }
 };
 
+const onInGameCollision = (event, bodyA, bodyB) => {
+  if (
+    (bodyA === ball.body && bodyB === redTeamGoal) ||
+    (bodyA === redTeamGoal && bodyB === ball.body)
+  ) {
+    console.log('Blue team scored!');
+    gameState.blueTeamScore += 1;
+    newTurn();
+  } else if (
+    (bodyA === ball.body && bodyB === blueTeamGoal) ||
+    (bodyA === blueTeamGoal && bodyB === ball.body)
+  ) {
+    console.log('Red team scored!');
+    gameState.redTeamScore += 1;
+    newTurn();
+  }
+};
 Events.on(engine, 'collisionStart', (event) => {
   event.pairs.forEach((pair) => {
     const { bodyA, bodyB } = pair;
-    if (
-      (bodyA === ball.body && bodyB === redTeamGoal)
-      || (bodyA === redTeamGoal && bodyB === ball.body)
-    ) {
-      console.log('Blue team scored!');
-      gameState.blueTeamScore += 1;
-      newTurn();
-    } else if (
-      (bodyA === ball.body && bodyB === blueTeamGoal)
-      || (bodyA === blueTeamGoal && bodyB === ball.body)
-    ) {
-      console.log('Red team scored!');
-      gameState.redTeamScore += 1;
-      newTurn();
+    if (gameState.state === states.IN_GAME) {
+      onInGameCollision(event, bodyA, bodyB);
     }
   });
 });
