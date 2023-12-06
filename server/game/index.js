@@ -323,22 +323,29 @@ const onPlayerLeave = (socket) => {
 };
 
 const onInGameCollision = (event, bodyA, bodyB) => {
-  if (
-    (bodyA === ball.body && bodyB === redTeamGoal) ||
-    (bodyA === redTeamGoal && bodyB === ball.body)
-  ) {
-    console.log('Blue team scored!');
-    gameState.blueTeamScore += 1;
-    newTurn();
-  } else if (
-    (bodyA === ball.body && bodyB === blueTeamGoal) ||
-    (bodyA === blueTeamGoal && bodyB === ball.body)
-  ) {
-    console.log('Red team scored!');
-    gameState.redTeamScore += 1;
-    newTurn();
-  }
+  const checkGoal = () => {
+    if (!ball) {
+      throw new Error('Ball is null');
+    }
+    if (
+      (bodyA === ball.body && bodyB === redTeamGoal) ||
+      (bodyA === redTeamGoal && bodyB === ball.body)
+    ) {
+      console.log('Blue team scored!');
+      gameState.blueTeamScore += 1;
+      newTurn();
+    } else if (
+      (bodyA === ball.body && bodyB === blueTeamGoal) ||
+      (bodyA === blueTeamGoal && bodyB === ball.body)
+    ) {
+      console.log('Red team scored!');
+      gameState.redTeamScore += 1;
+      newTurn();
+    }
+  };
+  checkGoal();
 };
+
 Events.on(engine, 'collisionStart', (event) => {
   event.pairs.forEach((pair) => {
     const { bodyA, bodyB } = pair;
