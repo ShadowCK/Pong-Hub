@@ -2,7 +2,7 @@ const Matter = require('matter-js');
 const Player = require('./Player.js');
 const { states, getGameState, setGameState } = require('./stateMachine.js');
 
-const { Engine, World, Bodies } = Matter;
+const { Engine, World, Bodies, Events } = Matter;
 
 // Create Matter.js engine
 const engine = Engine.create();
@@ -19,10 +19,9 @@ const walls = [
 // Add walls to the game world
 World.add(engine.world, walls);
 const goalOptions = { isStatic: true, isSensor: true };
-const goals = [
-  Bodies.rectangle(25, 300, 50, 600, { ...goalOptions, team: 'RED' }),
-  Bodies.rectangle(775, 300, 50, 600, { ...goalOptions, team: 'BLUE' }),
-];
+const redTeamGoal = Bodies.rectangle(25, 300, 50, 600, { ...goalOptions, team: 'RED' });
+const blueTeamGoal = Bodies.rectangle(775, 300, 50, 600, { ...goalOptions, team: 'BLUE' });
+const goals = [redTeamGoal, blueTeamGoal];
 World.add(engine.world, goals);
 
 /** @type {{ [playerId: string]: Player }} */
@@ -31,6 +30,7 @@ const players = {};
 const redTeamPlayers = [];
 /** @type {Player[]} */
 const blueTeamPlayers = [];
+/** @type {Matter.Body} */
 let ball = null;
 const redTeamCenter = { x: 200, y: 300 };
 const blueTeamCenter = { x: 600, y: 300 };
@@ -48,9 +48,7 @@ const gameState = {
  * @returns
  */
 const makePlayerData = (player) => {
-  const {
-    position, width, height, body, team,
-  } = player;
+  const { position, width, height, body, team } = player;
   return {
     position,
     x: position.x,
@@ -104,9 +102,7 @@ const getGameData = () => {
  * @param {import('../packets/index.js').PlayerMovementPacket} packet
  */
 const onPlayerMovementPacket = (packet) => {
-  const {
-    playerId, w, s, a, d,
-  } = packet;
+  const { playerId, w, s, a, d } = packet;
   const player = players[playerId];
   const accDir = { x: 0, y: 0 };
   if (player) {
@@ -207,6 +203,32 @@ const placePlayers = (playerArr, center, spread) => {
   });
 };
 
+const newTurn = () => {
+  console.log('New turn started!');
+  // Place players in their respective positions
+  placePlayers(redTeamPlayers, redTeamCenter, { x: 0, y: 200 });
+  placePlayers(blueTeamPlayers, blueTeamCenter, { x: 0, y: 200 });
+  Matter.Body.setPosition(ball, { x: 400, y: 300 });
+  // Give a random velocity to ball
+  const randomSection = Math.floor(Math.random() * 3);
+  let randomAngle;
+  if (randomSection === 0) {
+    // 0° to 60°
+    randomAngle = (Math.random() * Math.PI) / 3;
+  } else if (randomSection === 1) {
+    // 120° to 240°
+    randomAngle = (Math.PI / 3) * 2 + Math.random() * Math.PI;
+  } else if (randomSection === 2) {
+    // 300° to 360°
+    randomAngle = (Math.PI / 3) * 5 + (Math.random() * Math.PI) / 3;
+  }
+  const randomSpeed = Math.random() * 1 + 1;
+  Matter.Body.setVelocity(ball, {
+    x: Math.cos(randomAngle) * randomSpeed,
+    y: Math.sin(randomAngle) * randomSpeed,
+  });
+};
+
 const startGame = () => {
   console.log('Game started!');
   // Add a ball to the game world
@@ -231,10 +253,7 @@ const startGame = () => {
       blueTeamPlayers.push(player);
     }
   });
-
-  // Place players in their respective positions
-  placePlayers(redTeamPlayers, redTeamCenter, { x: 0, y: 200 });
-  placePlayers(blueTeamPlayers, blueTeamCenter, { x: 0, y: 200 });
+  newTurn();
 };
 
 const endGame = () => {
@@ -311,6 +330,22 @@ const onPlayerLeave = (socket) => {
     balanceTeams();
   }
 };
+
+Events.on(engine, 'collisionStart', (event) => {
+  event.pairs.forEach((pair) => {
+    const { bodyA, bodyB } = pair;
+    if ((bodyA === ball && bodyB === redTeamGoal) || (bodyA === redTeamGoal && bodyB === ball)) {
+      console.log('Blue team scored!');
+      newTurn();
+    } else if (
+      (bodyA === ball && bodyB === blueTeamGoal) ||
+      (bodyA === blueTeamGoal && bodyB === ball)
+    ) {
+      console.log('Red team scored!');
+      newTurn();
+    }
+  });
+});
 
 module.exports = {
   onPlayerMovementPacket,
