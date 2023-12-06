@@ -2,7 +2,8 @@ const React = require('react');
 const ReactDOM = require('react-dom');
 const Phaser = require('phaser');
 
-const utils = require('./gameUtils.js');
+const utils = require('./utils.js');
+const gameUtils = require('./gameUtils.js');
 
 const socket = io();
 
@@ -97,13 +98,13 @@ class GameWindow extends React.Component {
       fill: '#000000',
     });
     this.waitingText.setDepth(10000);
-    utils.centerGameObject(this.waitingText, scene);
+    gameUtils.centerGameObject(this.waitingText, scene);
     this.scoreText = scene.add.text(0, 0, 'Red 0 - 0 Blue', {
       font: '16px Arial',
       fill: '#000000',
     });
     this.scoreText.setDepth(10000);
-    utils.positionGameObject(this.scoreText, scene, { x: 0.5, y: 0.12 });
+    gameUtils.positionGameObject(this.scoreText, scene, { x: 0.5, y: 0.12 });
   };
 
   /**
@@ -129,7 +130,7 @@ class GameWindow extends React.Component {
       this.waitingText.setVisible(false);
       this.scoreText.setVisible(true);
       this.scoreText.text = `Red ${this.state.gameState.redTeamScore} - ${this.state.gameState.blueTeamScore} Blue`;
-      utils.positionGameObject(this.scoreText, scene, { x: 0.5, y: 0.12 });
+      gameUtils.positionGameObject(this.scoreText, scene, { x: 0.5, y: 0.12 });
     }
     // Draw goals
     Object.values(this.state.goals).forEach((goal) => {
@@ -138,12 +139,12 @@ class GameWindow extends React.Component {
       } else {
         this.graphics.fillStyle(0xe8fffe);
       }
-      utils.drawMatterBody(this.graphics, goal);
+      gameUtils.drawMatterBody(this.graphics, goal);
     });
     // Draw walls
     this.graphics.fillStyle(0x000000);
     this.state.walls.forEach((wall) => {
-      utils.drawMatterBody(this.graphics, wall);
+      gameUtils.drawMatterBody(this.graphics, wall);
     });
     // Draw ball
     if (this.state.ball) {
@@ -163,7 +164,7 @@ class GameWindow extends React.Component {
       } else {
         this.graphics.fillStyle(0x000000);
       }
-      utils.drawMatterBody(this.graphics, playerData);
+      gameUtils.drawMatterBody(this.graphics, playerData);
     });
   };
 
@@ -184,3 +185,5 @@ const init = () => {
 };
 
 window.onload = init;
+
+utils.initBulmaNavbar();

@@ -79,3 +79,5 @@ const init = () => {
 };
 
 window.onload = init;
+
+utils.initBulmaNavbar();
