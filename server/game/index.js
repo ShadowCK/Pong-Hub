@@ -2,7 +2,9 @@ const Matter = require('matter-js');
 const Player = require('./Player.js');
 const { states, getGameState, setGameState } = require('./stateMachine.js');
 
-const { Engine, World, Bodies, Events } = Matter;
+const {
+  Engine, World, Bodies, Events,
+} = Matter;
 
 // Create Matter.js engine
 const engine = Engine.create();
@@ -41,6 +43,8 @@ const gameState = {
   },
   lastUpdatedTime: performance.now(),
   deltaTime: 0, // in seconds
+  redTeamScore: 0,
+  blueTeamScore: 0,
 };
 
 /**
@@ -48,7 +52,9 @@ const gameState = {
  * @returns
  */
 const makePlayerData = (player) => {
-  const { position, width, height, body, team } = player;
+  const {
+    position, width, height, body, team,
+  } = player;
   return {
     position,
     x: position.x,
@@ -102,7 +108,9 @@ const getGameData = () => {
  * @param {import('../packets/index.js').PlayerMovementPacket} packet
  */
 const onPlayerMovementPacket = (packet) => {
-  const { playerId, w, s, a, d } = packet;
+  const {
+    playerId, w, s, a, d,
+  } = packet;
   const player = players[playerId];
   const accDir = { x: 0, y: 0 };
   if (player) {
@@ -231,6 +239,9 @@ const newTurn = () => {
 
 const startGame = () => {
   console.log('Game started!');
+  // Reset scores
+  gameState.blueTeamScore = 0;
+  gameState.redTeamScore = 0;
   // Add a ball to the game world
   ball = Bodies.circle(400, 300, 10, {
     restitution: 0.9,
@@ -336,12 +347,14 @@ Events.on(engine, 'collisionStart', (event) => {
     const { bodyA, bodyB } = pair;
     if ((bodyA === ball && bodyB === redTeamGoal) || (bodyA === redTeamGoal && bodyB === ball)) {
       console.log('Blue team scored!');
+      gameState.blueTeamScore += 1;
       newTurn();
     } else if (
-      (bodyA === ball && bodyB === blueTeamGoal) ||
-      (bodyA === blueTeamGoal && bodyB === ball)
+      (bodyA === ball && bodyB === blueTeamGoal)
+      || (bodyA === blueTeamGoal && bodyB === ball)
     ) {
       console.log('Red team scored!');
+      gameState.redTeamScore += 1;
       newTurn();
     }
   });

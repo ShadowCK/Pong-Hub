@@ -97,6 +97,12 @@ class GameWindow extends React.Component {
     });
     this.waitingText.setDepth(10000);
     utils.centerGameObject(this.waitingText, scene);
+    this.scoreText = scene.add.text(0, 0, 'Red 0 - 0 Blue', {
+      font: '16px Arial',
+      fill: '#000000',
+    });
+    this.scoreText.setDepth(10000);
+    utils.positionGameObject(this.scoreText, scene, { x: 0.5, y: 0.12 });
   };
 
   /**
@@ -114,10 +120,15 @@ class GameWindow extends React.Component {
     socket.emit('playerMovement', movement);
 
     this.graphics.clear();
+    // FIXME: May be moved to socket.on('gameUpdate')
     if (this.state.gameState.state === 'LOBBY') {
       this.waitingText.setVisible(true);
+      this.scoreText.setVisible(false);
     } else {
       this.waitingText.setVisible(false);
+      this.scoreText.setVisible(true);
+      this.scoreText.text = `Red ${this.state.gameState.redTeamScore} - ${this.state.gameState.blueTeamScore} Blue`;
+      utils.positionGameObject(this.scoreText, scene, { x: 0.5, y: 0.12 });
     }
     // Draw goals
     Object.values(this.state.goals).forEach((goal) => {
