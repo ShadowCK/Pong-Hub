@@ -54,18 +54,17 @@ redisClient.connect().then(() => {
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(bodyParser.json());
 
-  app.use(
-    session({
-      key: 'sessionid',
-      store: new RedisStore({
-        client: redisClient,
-        prefix: 'ponghub:sess:',
-      }),
-      secret: process.env.SESSION_SECRET,
-      resave: false,
-      saveUninitialized: false,
+  const sessionMiddleware = session({
+    key: 'sessionid',
+    store: new RedisStore({
+      client: redisClient,
+      prefix: 'ponghub:sess:',
     }),
-  );
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+  });
+  app.use(sessionMiddleware);
 
   app.engine('handlebars', expressHandlebars.engine({ defaultLayout: '' }));
   app.set('view engine', 'handlebars');
@@ -74,7 +73,7 @@ redisClient.connect().then(() => {
   router(app);
 
   // socket.io library can add socket.io to existing http or express servers.
-  const server = socketSetup(app);
+  const server = socketSetup(app, sessionMiddleware);
 
   server.listen(port, (err) => {
     if (err) {
