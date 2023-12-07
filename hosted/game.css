@@ -26,3 +26,8 @@ canvas {
   max-width: 100%;
   max-height: 100%;
 }
+
+#chat-messages {
+  height: 300px;
+  overflow-y: auto;
+}

@@ -55,13 +55,28 @@
           <!-- Column for the chat sidebar -->
           <div class='column'>
             <h2 class='title is-4'>Chat</h2>
-            <!-- Chat content goes here -->
-            <div id='chat'>
-              <!-- Chat interface elements -->
-              <p>Chat interface will be implemented here</p>
+            <!-- Chat content -->
+            <div id='chat' class='box'>
+              <!-- Chat messages display area -->
+              <div id='chat-messages' class='content'>
+                <!-- Messages will be appended here -->
+              </div>
+              <!-- Chat input field -->
+              <div class='field has-addons'>
+                <div class='control is-expanded'>
+                  <input
+                    id='chat-input'
+                    class='input'
+                    type='text'
+                    placeholder='Type a message...'
+                  />
+                </div>
+                <div class='control'>
+                  <button id='send-button' class='button is-info'>Send</button>
+                </div>
+              </div>
             </div>
           </div>
-
         </div>
       </div>
     </section>
