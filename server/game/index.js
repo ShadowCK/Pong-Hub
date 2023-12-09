@@ -98,7 +98,7 @@ const getGameData = () => ({
  */
 const onPlayerMovementPacket = (packet) => {
   const {
-    playerId, w, s, a, d, gamma, beta,
+    playerId, w, s, a, d, left, up, right, down, gamma, beta,
   } = packet;
   const player = players[playerId];
   if (player) {
@@ -114,7 +114,7 @@ const onPlayerMovementPacket = (packet) => {
       }
     };
     // Mobile device
-    if (gamma && beta) {
+    if (gamma != null && beta != null) {
       if (Math.abs(gamma) > gyroSensitivity.gamma) {
         accDir.x = Math.sign(gamma);
       } else {
@@ -125,19 +125,30 @@ const onPlayerMovementPacket = (packet) => {
       } else {
         accDir.y = 0;
       }
-      updatePlayerVelocity();
-      return;
-    }
-    // Desktop
-    if (w === s) {
-      accDir.y = 0;
+    } else if (w != null) {
+      // Desktop - WASD
+      if (w === s) {
+        accDir.y = 0;
+      } else {
+        accDir.y = w ? -1 : 1;
+      }
+      if (a === d) {
+        accDir.x = 0;
+      } else {
+        accDir.x = a ? -1 : 1;
+      }
     } else {
-      accDir.y = w ? -1 : 1;
-    }
-    if (a === d) {
-      accDir.x = 0;
-    } else {
-      accDir.x = a ? -1 : 1;
+      // Desktop - Arrow keys
+      if (up === down) {
+        accDir.y = 0;
+      } else {
+        accDir.y = up ? -1 : 1;
+      }
+      if (left === right) {
+        accDir.x = 0;
+      } else {
+        accDir.x = left ? -1 : 1;
+      }
     }
     updatePlayerVelocity();
   }

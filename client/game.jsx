@@ -184,13 +184,23 @@ class GameWindow extends React.Component {
    */
   update = (scene, time, delta) => {
     if (isClientMobile) {
+      // Using device orientation
       socket.emit('playerMovement', { gamma: this.gamma, beta: this.beta });
-    } else {
+    } else if (this.wKey.isDown || this.aKey.isDown || this.sKey.isDown || this.dKey.isDown) {
+      // Using WASD
       socket.emit('playerMovement', {
         w: this.wKey.isDown,
         a: this.aKey.isDown,
         s: this.sKey.isDown,
         d: this.dKey.isDown,
+      });
+    } else {
+      // Using arrow keys
+      socket.emit('playerMovement', {
+        left: this.cursors.left.isDown,
+        up: this.cursors.up.isDown,
+        right: this.cursors.right.isDown,
+        down: this.cursors.down.isDown,
       });
     }
 
