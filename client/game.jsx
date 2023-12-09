@@ -132,6 +132,7 @@ class GameWindow extends React.Component {
       messageContainer.appendChild(messageContentWrapper);
       // Add the complete message to the chat window
       document.getElementById('chat-messages').append(messageContainer);
+      messageContainer.scrollIntoView({ behavior: 'smooth', block: 'end' });
     });
     // Create graphics object
     this.graphics = scene.add.graphics({ fillStyle: { color: 0x00000 } });
