@@ -4,6 +4,8 @@ const { Server } = require('socket.io');
 const game = require('./game');
 const packets = require('./packets');
 
+const SESSION_RELOAD_INTERVAL = 3 * 1000;
+
 let io;
 
 /**
@@ -17,7 +19,7 @@ const initSocketEvents = (socket) => {
     console.log('A user disconnected');
     const { session } = socket.request;
     session.reload((err) => {
-      console.log('Cleaning socket.io related session data');
+      console.log('Cleaning socket.io-related session data');
       if (err) {
         console.log('Session alreay destroyed, probably because user logged out.');
       } else {
@@ -49,25 +51,50 @@ const socketSetup = (app, sessionMiddleware) => {
   io.engine.use(sessionMiddleware);
 
   // Avoid multiple connections for one user
-  // socket.io middlewares are executed before the connection event is fired.
-  io.use((socket, next) => {
-    // * Does not need to reload session here, because the middleware
-    // is processing a newly created socket, whose session is just loaded.
+
+  io.on('connection', (socket) => {
+    console.log('A user tries to connect');
     const { session } = socket.request;
-    // If already connected to the game, reject the connection
-    if (session.isConnectedToGame === true) {
-      console.log("Rejected a user because they're already connected to the game");
+    session.reload((err) => {
+      if (err) {
+        console.log("An error occured while trying to reload the user's session", err);
+        socket.disconnect();
+      }
+    });
+    // I tried to use a socket.io middleware to disconnect but then the client
+    // won't receive the 'rejected' event
+    if (!session.account) {
+      console.log("Rejected the user because they're not logged in");
+      socket.emit('rejected', "You're not logged in");
       socket.disconnect();
       return;
     }
+    if (session.isConnectedToGame === true) {
+      console.log("Rejected the user because they're already connected to the game");
+      socket.emit('rejected', "You're already connected to the game");
+      socket.disconnect();
+      return;
+    }
+
     session.isConnectedToGame = true;
     session.save();
-    next();
-  });
 
-  io.on('connection', (socket) => {
-    console.log('A user connected');
-    console.log(socket.request.session);
+    console.log('The user connected');
+    console.log(session);
+
+    // Regularly check if the session is still valid. If not, disconnect the user.
+    const timer = setInterval(() => {
+      session.reload((err) => {
+        if (err) {
+          console.log('session does not exist anymore, forcing the user to reconnect');
+          // Similar to socket.disconnect(), but this allows the client to reconnect
+          socket.conn.close();
+        }
+      });
+    }, SESSION_RELOAD_INTERVAL);
+    socket.on('disconnect', () => {
+      clearInterval(timer);
+    });
 
     game.onPlayerJoin(socket);
     initSocketEvents(socket);

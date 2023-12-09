@@ -5,7 +5,7 @@ const Phaser = require('phaser');
 const utils = require('./utils.js');
 const gameUtils = require('./gameUtils.js');
 
-const socket = io();
+let socket;
 
 class GameWindow extends React.Component {
   /** @type {Phaser.GameObjects.Graphics} */
@@ -74,6 +74,7 @@ class GameWindow extends React.Component {
    * @param {Phaser.Scene} scene
    */
   create = (scene) => {
+    socket = io();
     // Register socket event handlers
     socket.on('gameUpdate', (gameData) => {
       this.setState({
@@ -83,6 +84,12 @@ class GameWindow extends React.Component {
         ball: gameData.ball,
         goals: gameData.goals,
       });
+    });
+    socket.on('rejected', (reason) => {
+      console.log(`Rejected by server: ${reason}`);
+      // Destroy the game instance and remove the canvas element
+      this.game.destroy(true);
+      this.game = null;
     });
     // Create graphics object
     this.graphics = scene.add.graphics({ fillStyle: { color: 0x00000 } });
