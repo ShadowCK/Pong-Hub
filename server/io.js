@@ -6,6 +6,7 @@ const packets = require('./packets');
 
 const SESSION_RELOAD_INTERVAL = 3 * 1000;
 
+/** @type {import('socket.io').Server} */
 let io;
 
 /**
@@ -34,6 +35,19 @@ const initSocketEvents = (socket) => {
     game.onPlayerMovementPacket(
       new packets.PlayerMovementPacket({ playerId: socket.id, ...packet }),
     );
+  });
+
+  socket.on('chatMessage', (packet) => {
+    const { session } = socket.request;
+    io.emit(
+      'chatMessage',
+      new packets.PlayerChatPacket({
+        playerId: socket.id,
+        username: session.account.username,
+        ...packet,
+      }),
+    );
+    // TODO: Add a chat history to the game state and call game.onPlayerChatPacket to update it.
   });
 
   const gameData = game.getGameData();

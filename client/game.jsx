@@ -82,6 +82,12 @@ class GameWindow extends React.Component {
   create = (scene) => {
     socket = io();
     // Register socket event handlers
+    socket.on('rejected', (reason) => {
+      console.log(`Rejected by server: ${reason}`);
+      // Destroy the game instance and remove the canvas element
+      this.game.destroy(true);
+      this.game = null;
+    });
     socket.on('gameUpdate', (gameData) => {
       this.setState({
         players: gameData.players,
@@ -91,11 +97,27 @@ class GameWindow extends React.Component {
         goals: gameData.goals,
       });
     });
-    socket.on('rejected', (reason) => {
-      console.log(`Rejected by server: ${reason}`);
-      // Destroy the game instance and remove the canvas element
-      this.game.destroy(true);
-      this.game = null;
+    socket.on('chatMessage', (packet) => {
+      console.log(packet);
+      const { username, msg, timestamp } = packet;
+      // Container for the chat message
+      const messageContainer = document.createElement('article');
+      messageContainer.className = 'media';
+      // Wrapper for the message content
+      const messageContentWrapper = document.createElement('div');
+      messageContentWrapper.className = 'media-content';
+      // Container for the actual message text
+      const messageTextContainer = document.createElement('div');
+      messageTextContainer.className = 'content';
+      // Format and set the message content
+      messageTextContainer.innerHTML = `<p><strong>${username}</strong> <small>${new Date(
+        timestamp,
+      ).toLocaleTimeString()}</small><br>${msg}</p>`;
+      // Assemble the message structure
+      messageContentWrapper.appendChild(messageTextContainer);
+      messageContainer.appendChild(messageContentWrapper);
+      // Add the complete message to the chat window
+      document.getElementById('chat-messages').append(messageContainer);
     });
     // Create graphics object
     this.graphics = scene.add.graphics({ fillStyle: { color: 0x00000 } });
@@ -201,6 +223,12 @@ class GameWindow extends React.Component {
 }
 
 const init = () => {
+  document.getElementById('send-button').addEventListener('click', () => {
+    const chatInput = document.getElementById('chat-input');
+    socket.emit('chatMessage', { msg: chatInput.value, timestamp: Date.now() });
+    chatInput.value = '';
+  });
+
   ReactDOM.render(<GameWindow />, document.getElementById('content'));
   fetch('/api/user/info')
     .then((res) => res.json())
