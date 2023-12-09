@@ -34,6 +34,7 @@ class Player {
       density: 100,
       ...options,
     });
+    this.body.parentGameObject = this;
   }
 
   get position() {

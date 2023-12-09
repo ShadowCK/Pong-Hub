@@ -238,7 +238,17 @@ class GameWindow extends React.Component {
     });
     // Draw ball
     if (this.state.ball) {
-      this.graphics.fillStyle(0x000000);
+      const { team } = this.state.ball;
+      if (team === 'RED') {
+        this.graphics.fillStyle(0xff0000);
+      } else if (team === 'BLUE') {
+        this.graphics.fillStyle(0x0000ff);
+      } else if (team == null) {
+        this.graphics.fillStyle(0x000000);
+      } else {
+        // For debugging only. Should not happen.
+        this.graphics.fillStyle(0xefefef);
+      }
       this.graphics.fillCircle(
         this.state.ball.position.x,
         this.state.ball.position.y,

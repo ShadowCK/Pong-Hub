@@ -22,6 +22,11 @@ const MASK_PLAYER = new BitBuilder()
   .or(CATEGORY_BALL)
   .or(CATEGORY_NET)
   .build();
+const MASK_PLAYER_NO_BALL = new BitBuilder()
+  .or(CATEGORY_PLAYER)
+  .or(CATEGORY_WALL)
+  .or(CATEGORY_NET)
+  .build();
 const MASK_WALL = MASK_DEFAULT;
 const MASK_BALL = new BitBuilder().or(CATEGORY_PLAYER).or(CATEGORY_WALL).or(CATEGORY_GOAL)
   .build();
@@ -30,6 +35,11 @@ const MASK_NET = new BitBuilder().or(CATEGORY_PLAYER).build();
 const FILTER_PLAYER = {
   category: CATEGORY_PLAYER,
   mask: MASK_PLAYER,
+  group: 0,
+};
+const FILTER_PLAYER_NO_BALL = {
+  category: CATEGORY_PLAYER,
+  mask: MASK_PLAYER_NO_BALL,
   group: 0,
 };
 const FILTER_WALL = {
@@ -135,11 +145,21 @@ const makePlayerData = (player) => {
   };
 };
 
+const makeBallData = () => {
+  if (ball == null) {
+    return null;
+  }
+  return {
+    ...makeBodyData(ball.body),
+    team: ball.team,
+  };
+};
+
 const getGameData = () => ({
   gameState,
   players: _.mapObject(players, makePlayerData),
   walls: walls.map(makeBodyData),
-  ball: ball == null ? null : makeBodyData(ball.body),
+  ball: makeBallData(),
   goals: goals.map((goal) => ({
     ...makeBodyData(goal),
     team: goal.team,
@@ -301,6 +321,13 @@ const placePlayers = (playerArr, center, spread) => {
 
 const newTurn = () => {
   console.log('New turn started!');
+  // Reset players' collision filters
+  [...redTeamPlayers, ...blueTeamPlayers].forEach((player) => {
+    const playerBody = player.body;
+    playerBody.collisionFilter = FILTER_PLAYER;
+  });
+  // Reset ball's belonging / which team hit it
+  ball.team = null;
   // Place players in their respective positions
   placePlayers(redTeamPlayers, redTeamCenter, { x: 0, y: 200 });
   placePlayers(blueTeamPlayers, blueTeamCenter, { x: 0, y: 200 });
@@ -425,7 +452,7 @@ const onPlayerLeave = (socket) => {
   }
 };
 
-const onInGameCollision = (event, bodyA, bodyB) => {
+const onInGameCollisionStart = (event, bodyA, bodyB) => {
   const checkGoal = () => {
     if (!ball) {
       throw new Error('Ball is null');
@@ -449,11 +476,43 @@ const onInGameCollision = (event, bodyA, bodyB) => {
   checkGoal();
 };
 
+const onInGameCollisionEnd = (event, bodyA, bodyB) => {
+  const checkHit = () => {
+    if (!ball) {
+      throw new Error('Ball is null');
+    }
+    // After hitting the ball, the team can't hit it again until the other team hit it
+    if (
+      (bodyA === ball.body && bodyB.parentGameObject instanceof Player)
+      || (bodyA.parentGameObject instanceof Player && bodyB === ball.body)
+    ) {
+      const playerIsB = bodyB.parentGameObject instanceof Player;
+      const player = playerIsB ? bodyB.parentGameObject : bodyA.parentGameObject;
+      const { team } = player;
+      ball.team = team;
+      [...redTeamPlayers, ...blueTeamPlayers].forEach((p) => {
+        const playerBody = p.body;
+        playerBody.collisionFilter = p.team === team ? FILTER_PLAYER_NO_BALL : FILTER_PLAYER;
+      });
+    }
+  };
+  checkHit();
+};
+
 Events.on(engine, 'collisionStart', (event) => {
   event.pairs.forEach((pair) => {
     const { bodyA, bodyB } = pair;
     if (gameState.state === states.IN_GAME) {
-      onInGameCollision(event, bodyA, bodyB);
+      onInGameCollisionStart(event, bodyA, bodyB);
+    }
+  });
+});
+
+Events.on(engine, 'collisionEnd', (event) => {
+  event.pairs.forEach((pair) => {
+    const { bodyA, bodyB } = pair;
+    if (gameState.state === states.IN_GAME) {
+      onInGameCollisionEnd(event, bodyA, bodyB);
     }
   });
 });

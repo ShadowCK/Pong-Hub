@@ -5,9 +5,11 @@ const { Bodies } = Matter;
 class Ball {
   body;
 
-  minSpeed = 50 / 60;
+  minSpeed = 100 / 60;
 
   maxSpeed = 400 / 60;
+
+  team = null;
 
   constructor(x, y, radius, options) {
     this.body = Bodies.circle(x, y, radius, {
@@ -20,6 +22,7 @@ class Ball {
       frictionStatic: 0.1,
       ...options,
     });
+    this.body.parentGameObject = this;
   }
 
   get position() {
