@@ -7,7 +7,7 @@ class Ball {
 
   maxSpeed = 400 / 60;
 
-  constructor(x, y, radius) {
+  constructor(x, y, radius, options) {
     this.body = Bodies.circle(x, y, radius, {
       restitution: 0.9,
       // TODO: setting this to smaller than 0.001 somehow does not
@@ -16,6 +16,7 @@ class Ball {
       friction: 0.01,
       frictionAir: 0.001,
       frictionStatic: 0.1,
+      ...options,
     });
   }
 

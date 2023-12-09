@@ -17,7 +17,7 @@ class Player {
 
   team = null;
 
-  constructor(id, username, x, y, width, height) {
+  constructor(id, username, x, y, width, height, options = {}) {
     this.id = id;
     this.username = username;
     this.width = width;
@@ -32,6 +32,7 @@ class Player {
       restitution: 0.1,
       // High enough so that the ball can't push the player
       density: 100,
+      ...options,
     });
   }
 

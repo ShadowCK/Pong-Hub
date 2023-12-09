@@ -34,6 +34,7 @@
   },
   "dependencies": {
     "bcrypt": "^5.1.0",
+    "bitwise": "^2.2.0",
     "body-parser": "^1.20.2",
     "compression": "^1.7.4",
     "connect-redis": "^7.0.1",

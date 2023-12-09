@@ -3,6 +3,56 @@ const _ = require('underscore');
 const Player = require('./Player.js');
 const Ball = require('./Ball.js');
 const { states, getGameState, setGameState } = require('./stateMachine.js');
+const BitBuilder = require('./BitBuilder.js');
+
+// #region Collision Filters Setup
+// Note: Bodies without collision filter will collide with everything
+// Filters must have 'group' set, otherwise undefined behavior will occur. For example,
+// two bodies of the same category will never collide with each other if 'group' is not set.
+// const CATEGORY_DEFAULT = 0x00000001;
+const CATEGORY_PLAYER = 0x00000002;
+const CATEGORY_WALL = 0x00000004;
+const CATEGORY_BALL = 0x00000008;
+const CATEGORY_GOAL = 0x00000010;
+const CATEGORY_NET = 0x00000020;
+const MASK_DEFAULT = 0xffffffff; // Can collide with everything
+const MASK_PLAYER = new BitBuilder()
+  .or(CATEGORY_PLAYER)
+  .or(CATEGORY_WALL)
+  .or(CATEGORY_BALL)
+  .or(CATEGORY_NET)
+  .build();
+const MASK_WALL = MASK_DEFAULT;
+const MASK_BALL = new BitBuilder().or(CATEGORY_PLAYER).or(CATEGORY_WALL).or(CATEGORY_GOAL)
+  .build();
+const MASK_GOAL = new BitBuilder().or(CATEGORY_BALL).build();
+const MASK_NET = new BitBuilder().or(CATEGORY_PLAYER).build();
+const FILTER_PLAYER = {
+  category: CATEGORY_PLAYER,
+  mask: MASK_PLAYER,
+  group: 0,
+};
+const FILTER_WALL = {
+  category: CATEGORY_WALL,
+  mask: MASK_WALL,
+  group: 0,
+};
+const FILTER_BALL = {
+  category: CATEGORY_BALL,
+  mask: MASK_BALL,
+  group: 0,
+};
+const FILTER_GOAL = {
+  category: CATEGORY_GOAL,
+  mask: MASK_GOAL,
+  group: 0,
+};
+const FILTER_NET = {
+  category: CATEGORY_NET,
+  mask: MASK_NET,
+  group: 0,
+};
+// #endregion
 
 const {
   Engine, World, Bodies, Events,
@@ -12,7 +62,8 @@ const {
 const engine = Engine.create();
 engine.gravity = { x: 0, y: 0 }; // No gravity
 
-const wallOptions = { isStatic: true }; // isStatic means the object will not move
+// isStatic means the object will not move
+const wallOptions = { isStatic: true, collisionFilter: FILTER_WALL };
 const walls = [
   // top, bottom, left, right
   Bodies.rectangle(400, -20, 800, 50, wallOptions),
@@ -22,11 +73,13 @@ const walls = [
 ];
 // Add walls to the game world
 World.add(engine.world, walls);
-const goalOptions = { isStatic: true, isSensor: true };
+const goalOptions = { isStatic: true, isSensor: true, collisionFilter: FILTER_GOAL };
 const redTeamGoal = Bodies.rectangle(25, 300, 50, 600, { ...goalOptions, team: 'RED' });
 const blueTeamGoal = Bodies.rectangle(775, 300, 50, 600, { ...goalOptions, team: 'BLUE' });
 const goals = [redTeamGoal, blueTeamGoal];
 World.add(engine.world, goals);
+const net = Bodies.rectangle(400, 300, 10, 600, { isStatic: true, collisionFilter: FILTER_NET });
+World.add(engine.world, net);
 
 /** @type {{ [playerId: string]: Player }} */
 const players = {};
@@ -91,6 +144,7 @@ const getGameData = () => ({
     ...makeBodyData(goal),
     team: goal.team,
   })),
+  net: makeBodyData(net),
 });
 
 /**
@@ -180,7 +234,9 @@ const gameLoop = () => {
 };
 
 const addPlayer = (playerId, username, x, y, width, height) => {
-  const player = new Player(playerId, username, x, y, width, height);
+  const player = new Player(playerId, username, x, y, width, height, {
+    collisionFilter: FILTER_PLAYER,
+  });
   players[playerId] = player;
   World.add(engine.world, player.body);
   return player;
@@ -271,7 +327,7 @@ const startGame = () => {
   gameState.blueTeamScore = 0;
   gameState.redTeamScore = 0;
   // Add a ball to the game world
-  ball = new Ball(400, 300, 10);
+  ball = new Ball(400, 300, 10, { collisionFilter: FILTER_BALL });
   console.log(ball);
   World.add(engine.world, ball.body);
   // Assign players to teams

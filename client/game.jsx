@@ -25,6 +25,7 @@ class GameWindow extends React.Component {
       walls: [],
       ball: null,
       goals: [],
+      net: null,
     };
     this.playerNametags = {};
   }
@@ -114,6 +115,7 @@ class GameWindow extends React.Component {
         walls: gameData.walls,
         ball: gameData.ball,
         goals: gameData.goals,
+        net: gameData.net,
       });
     });
     socket.on('chatMessage', (packet) => {
@@ -224,6 +226,11 @@ class GameWindow extends React.Component {
       }
       gameUtils.drawMatterBody(this.graphics, goal);
     });
+    // Draw net
+    if (this.state.net) {
+      this.graphics.fillStyle(0xefefef);
+      gameUtils.drawMatterBody(this.graphics, this.state.net);
+    }
     // Draw walls
     this.graphics.fillStyle(0x000000);
     this.state.walls.forEach((wall) => {
