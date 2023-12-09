@@ -74,8 +74,9 @@ const makeBodyData = (body) => ({
  * @returns
  */
 const makePlayerData = (player) => {
-  const { body, team } = player;
+  const { username, body, team } = player;
   return {
+    username,
     ...makeBodyData(body),
     team,
   };
@@ -83,7 +84,7 @@ const makePlayerData = (player) => {
 
 const getGameData = () => ({
   gameState,
-  players: _.mapObject(players, (player) => makePlayerData(player)),
+  players: _.mapObject(players, makePlayerData),
   walls: walls.map(makeBodyData),
   ball: ball == null ? null : makeBodyData(ball.body),
   goals: goals.map((goal) => ({
@@ -167,8 +168,8 @@ const gameLoop = () => {
   gameState.lastUpdatedTime = currentTime;
 };
 
-const addPlayer = (playerId, x, y, width, height) => {
-  const player = new Player(playerId, x, y, width, height);
+const addPlayer = (playerId, username, x, y, width, height) => {
+  const player = new Player(playerId, username, x, y, width, height);
   players[playerId] = player;
   World.add(engine.world, player.body);
   return player;
@@ -319,8 +320,11 @@ const balanceTeams = () => {
   console.log('Blue Team Players:', blueTeamPlayers);
 };
 
+/**
+ * @param {import('socket.io').Socket} socket
+ */
 const onPlayerJoin = (socket) => {
-  const player = addPlayer(socket.id, 100, 100, 20, 100);
+  const player = addPlayer(socket.id, socket.request.session.account.username, 100, 100, 20, 100);
   // Start game if there are at least 2 players
   const currentState = getGameState();
   if (currentState === states.LOBBY && Object.keys(players).length >= 2) {

@@ -26,6 +26,7 @@ class GameWindow extends React.Component {
       ball: null,
       goals: [],
     };
+    this.playerNametags = {};
   }
 
   componentDidMount() {
@@ -80,6 +81,10 @@ class GameWindow extends React.Component {
    * @param {Phaser.Scene} scene
    */
   create = (scene) => {
+    // TODO: This is for debugging only. Remove this later.
+    window.test = () => {
+      console.log(this.state);
+    };
     this.game.canvas.setAttribute('tabindex', '0');
     this.game.canvas.addEventListener('focus', () => {
       console.log('Canvas focused');
@@ -218,7 +223,7 @@ class GameWindow extends React.Component {
       );
     }
     // Draw players
-    Object.values(this.state.players).forEach((playerData) => {
+    Object.entries(this.state.players).forEach(([playerId, playerData]) => {
       if (playerData.team === 'RED') {
         this.graphics.fillStyle(0xff0000);
       } else if (playerData.team === 'BLUE') {
@@ -227,6 +232,29 @@ class GameWindow extends React.Component {
         this.graphics.fillStyle(0x000000);
       }
       gameUtils.drawMatterBody(this.graphics, playerData);
+      if (!this.playerNametags[playerId]) {
+        this.playerNametags[playerId] = scene.add
+          .text(0, 0, playerData.username, {
+            font: '14px Arial',
+            fill: '#000000',
+            align: 'center',
+          })
+          .setOrigin(0.5, 1);
+      }
+      this.playerNametags[playerId].setPosition(
+        playerData.x,
+        playerData.y - playerData.height / 2 - 5, // 5px on top of the player
+      );
+    });
+    // FIXME: This is a super dirty way to remove nametags of disconnected players.
+    // Will be fixed after adding player-related events, such as playerJoin, playerLeave, etc.
+    // The client currently doesn't know when a player leaves. It only receives player datas
+    // from the server, so we have to do this.
+    Object.entries(this.playerNametags).forEach(([playerId, nametag]) => {
+      if (!this.state.players[playerId]) {
+        nametag.destroy();
+        delete this.playerNametags[playerId];
+      }
     });
   };
 

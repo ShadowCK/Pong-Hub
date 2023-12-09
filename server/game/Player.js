@@ -17,8 +17,9 @@ class Player {
 
   team = null;
 
-  constructor(id, x, y, width, height) {
+  constructor(id, username, x, y, width, height) {
     this.id = id;
+    this.username = username;
     this.width = width;
     this.height = height;
     this.body = Matter.Bodies.rectangle(x, y, width, height, {
