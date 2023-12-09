@@ -1,6 +1,6 @@
 {
   "name": "ponghub",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Simple MVC project. Allows players to play pong online.",
   "main": "./server/app.js",
   "scripts": {
