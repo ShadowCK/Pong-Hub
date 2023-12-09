@@ -6,10 +6,11 @@ class PlayerChatPacket {
    * @param {number} timestamp - The timestamp of the message
    */
   constructor({
-    playerId, username, msg, timestamp,
+    playerId, username, team, msg, timestamp,
   }) {
     this.playerId = playerId;
     this.username = username;
+    this.team = team;
     this.msg = msg;
     this.timestamp = timestamp;
   }

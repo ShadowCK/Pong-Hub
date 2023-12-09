@@ -395,4 +395,5 @@ module.exports = {
   getGameData,
   onPlayerJoin,
   onPlayerLeave,
+  players,
 };

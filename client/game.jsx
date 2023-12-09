@@ -129,7 +129,13 @@ class GameWindow extends React.Component {
       const messageTextContainer = document.createElement('div');
       messageTextContainer.className = 'content';
       // Format and set the message content
-      messageTextContainer.innerHTML = `<p><strong>${username}</strong> <small>${new Date(
+      let teamColorClass = 'chat-no-team';
+      if (packet.team === 'RED') {
+        teamColorClass = 'chat-red-team';
+      } else if (packet.team === 'BLUE') {
+        teamColorClass = 'chat-blue-team';
+      }
+      messageTextContainer.innerHTML = `<p><span class=${teamColorClass}>${username}</span> <small>${new Date(
         timestamp,
       ).toLocaleTimeString()}</small><br>${msg}</p>`;
       // Assemble the message structure

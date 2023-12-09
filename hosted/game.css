@@ -31,3 +31,18 @@ canvas {
   height: 300px;
   overflow-y: auto;
 }
+
+.chat-no-team {
+  color: #000000;
+  font-weight: bold;
+}
+
+.chat-red-team {
+  color: #ff0000;
+  font-weight: bold;
+}
+
+.chat-blue-team {
+  color: #0000ff;
+  font-weight: bold;
+}

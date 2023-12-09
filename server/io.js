@@ -39,11 +39,13 @@ const initSocketEvents = (socket) => {
 
   socket.on('chatMessage', (packet) => {
     const { session } = socket.request;
+    const { team } = game.players[socket.id];
     io.emit(
       'chatMessage',
       new packets.PlayerChatPacket({
         playerId: socket.id,
         username: session.account.username,
+        team,
         ...packet,
       }),
     );
