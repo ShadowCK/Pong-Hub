@@ -224,10 +224,14 @@ const gameLoop = () => {
 
   if (gameState.state === states.IN_GAME && ball) {
     if (ball.body.speed > ball.maxSpeed) {
-      Matter.Body.setVelocity(
-        ball.body,
-        Matter.Vector.mult(ball.body.velocity, ball.maxSpeed / ball.body.speed),
-      );
+      ball.speed = ball.maxSpeed;
+    } else if (ball.body.speed < ball.minSpeed) {
+      // If ball is not moving, give it a random direction - technically a velocity,
+      // But we will set its speed to minSpeed, so only the direction matters.
+      if (ball.body.speed === 0) {
+        ball.velocity = { x: Math.random() - 0.5, y: Math.random() - 0.5 };
+      }
+      ball.speed = ball.minSpeed;
     }
   }
   gameState.lastUpdatedTime = currentTime;

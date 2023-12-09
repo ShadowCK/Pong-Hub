@@ -5,6 +5,8 @@ const { Bodies } = Matter;
 class Ball {
   body;
 
+  minSpeed = 50 / 60;
+
   maxSpeed = 400 / 60;
 
   constructor(x, y, radius, options) {
