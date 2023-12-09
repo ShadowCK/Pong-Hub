@@ -80,6 +80,20 @@ class GameWindow extends React.Component {
    * @param {Phaser.Scene} scene
    */
   create = (scene) => {
+    this.game.canvas.setAttribute('tabindex', '0');
+    this.game.canvas.addEventListener('focus', () => {
+      console.log('Canvas focused');
+      this.game.input.keyboard.enabled = true;
+    });
+    this.game.canvas.addEventListener('blur', () => {
+      console.log('Canvas blurred');
+      this.game.input.keyboard.enabled = false;
+    });
+    this.game.canvas.addEventListener('click', () => {
+      console.log('Canvas clicked');
+      this.game.canvas.focus();
+    });
+
     socket = io();
     // Register socket event handlers
     socket.on('rejected', (reason) => {
@@ -223,10 +237,18 @@ class GameWindow extends React.Component {
 }
 
 const init = () => {
-  document.getElementById('send-button').addEventListener('click', () => {
+  const sendChatMessage = () => {
     const chatInput = document.getElementById('chat-input');
     socket.emit('chatMessage', { msg: chatInput.value, timestamp: Date.now() });
     chatInput.value = '';
+  };
+  document.getElementById('send-button').addEventListener('click', () => {
+    sendChatMessage();
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' && document.activeElement === document.getElementById('chat-input')) {
+      sendChatMessage();
+    }
   });
 
   ReactDOM.render(<GameWindow />, document.getElementById('content'));
