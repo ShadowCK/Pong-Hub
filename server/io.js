@@ -44,23 +44,16 @@ const initSocketEvents = (socket) => {
   // ...Other code...
 };
 
-const socketSetup = (app, sessionMiddleware) => {
+const socketSetup = (app, sessionMiddleware, serverStartTime) => {
   const server = http.createServer(app);
   io = new Server(server);
   // This grants socket.io access to the session data
   io.engine.use(sessionMiddleware);
 
-  // Avoid multiple connections for one user
-
-  io.on('connection', (socket) => {
+  io.on('connection', async (socket) => {
     console.log('A user tries to connect');
     const { session } = socket.request;
-    session.reload((err) => {
-      if (err) {
-        console.log("An error occured while trying to reload the user's session", err);
-        socket.disconnect();
-      }
-    });
+
     // I tried to use a socket.io middleware to disconnect but then the client
     // won't receive the 'rejected' event
     if (!session.account) {
@@ -68,6 +61,11 @@ const socketSetup = (app, sessionMiddleware) => {
       socket.emit('rejected', "You're not logged in");
       socket.disconnect();
       return;
+    }
+    if (!session.serverStartTime || session.serverStartTime !== serverStartTime) {
+      console.log("Server restarted, resetting session's isConnectedToGame");
+      session.serverStartTime = serverStartTime;
+      session.isConnectedToGame = false;
     }
     if (session.isConnectedToGame === true) {
       console.log("Rejected the user because they're already connected to the game");

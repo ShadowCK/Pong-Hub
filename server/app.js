@@ -1,6 +1,8 @@
 // Read .env file and set environment variables for local development
 require('dotenv').config();
 
+const serverStartTime = Date.now();
+
 // Require modules
 // Node.js path module
 const path = require('path');
@@ -73,7 +75,7 @@ redisClient.connect().then(() => {
   router(app);
 
   // socket.io library can add socket.io to existing http or express servers.
-  const server = socketSetup(app, sessionMiddleware);
+  const server = socketSetup(app, sessionMiddleware, serverStartTime);
 
   server.listen(port, (err) => {
     if (err) {
