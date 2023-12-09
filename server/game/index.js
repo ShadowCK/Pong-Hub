@@ -49,6 +49,11 @@ const gameState = {
   blueTeamScore: 0,
 };
 
+const gyroSensitivity = {
+  gamma: 5, // X movement
+  beta: 7.5, // Y movement
+};
+
 /**
  * @param {Matter.Body} body
  * @returns {{
@@ -92,11 +97,37 @@ const getGameData = () => ({
  */
 const onPlayerMovementPacket = (packet) => {
   const {
-    playerId, w, s, a, d,
+    playerId, w, s, a, d, gamma, beta,
   } = packet;
   const player = players[playerId];
-  const accDir = { x: 0, y: 0 };
   if (player) {
+    const accDir = { x: 0, y: 0 };
+    const updatePlayerVelocity = () => {
+      player.velocity = Matter.Vector.add(
+        player.velocity,
+        Matter.Vector.mult(accDir, player.acceleration * gameState.deltaTime),
+      );
+      const currentSpeed = Matter.Vector.magnitude(player.velocity);
+      if (currentSpeed > player.maxSpeed) {
+        player.velocity = Matter.Vector.mult(player.velocity, player.maxSpeed / currentSpeed);
+      }
+    };
+    // Mobile device
+    if (gamma && beta) {
+      if (Math.abs(gamma) > gyroSensitivity.gamma) {
+        accDir.x = Math.sign(gamma);
+      } else {
+        accDir.x = 0;
+      }
+      if (Math.abs(beta) > gyroSensitivity.beta) {
+        accDir.y = Math.sign(beta);
+      } else {
+        accDir.y = 0;
+      }
+      updatePlayerVelocity();
+      return;
+    }
+    // Desktop
     if (w === s) {
       accDir.y = 0;
     } else {
@@ -107,14 +138,7 @@ const onPlayerMovementPacket = (packet) => {
     } else {
       accDir.x = a ? -1 : 1;
     }
-    player.velocity = Matter.Vector.add(
-      player.velocity,
-      Matter.Vector.mult(accDir, player.acceleration * gameState.deltaTime),
-    );
-    const currentSpeed = Matter.Vector.magnitude(player.velocity);
-    if (currentSpeed > player.maxSpeed) {
-      player.velocity = Matter.Vector.mult(player.velocity, player.maxSpeed / currentSpeed);
-    }
+    updatePlayerVelocity();
   }
 };
 

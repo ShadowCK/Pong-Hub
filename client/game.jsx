@@ -7,6 +7,12 @@ const gameUtils = require('./gameUtils.js');
 
 let socket;
 
+function isMobile() {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+}
+
+const isClientMobile = isMobile();
+
 class GameWindow extends React.Component {
   /** @type {Phaser.GameObjects.Graphics} */
   graphics;
@@ -94,11 +100,20 @@ class GameWindow extends React.Component {
     // Create graphics object
     this.graphics = scene.add.graphics({ fillStyle: { color: 0x00000 } });
     // Register inputs
-    this.cursors = scene.input.keyboard.createCursorKeys();
-    this.wKey = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
-    this.aKey = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
-    this.sKey = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
-    this.dKey = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
+    if (isClientMobile) {
+      const updateOrientation = (event) => {
+        this.gamma = event.gamma; // -90~90 left and right tilt
+        this.beta = event.beta; // -180~180 front and back tilt
+      };
+      window.addEventListener('deviceorientation', updateOrientation, true);
+    } else {
+      // TODO: The current movement is only wasd, not using arrow keys
+      this.cursors = scene.input.keyboard.createCursorKeys();
+      this.wKey = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
+      this.aKey = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
+      this.sKey = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
+      this.dKey = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
+    }
     // Create a waiting for player text in lobby state
     this.waitingText = scene.add.text(0, 0, 'Waiting for players...', {
       font: '16px Arial',
@@ -120,13 +135,16 @@ class GameWindow extends React.Component {
    * @param {number} delta
    */
   update = (scene, time, delta) => {
-    const movement = {
-      w: this.wKey.isDown,
-      a: this.aKey.isDown,
-      s: this.sKey.isDown,
-      d: this.dKey.isDown,
-    };
-    socket.emit('playerMovement', movement);
+    if (isClientMobile) {
+      socket.emit('playerMovement', { gamma: this.gamma, beta: this.beta });
+    } else {
+      socket.emit('playerMovement', {
+        w: this.wKey.isDown,
+        a: this.aKey.isDown,
+        s: this.sKey.isDown,
+        d: this.dKey.isDown,
+      });
+    }
 
     this.graphics.clear();
     // FIXME: May be moved to socket.on('gameUpdate')

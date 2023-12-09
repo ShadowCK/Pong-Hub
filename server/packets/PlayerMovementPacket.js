@@ -5,13 +5,19 @@ class PlayerMovementPacket {
    * @param {boolean} a - If the a key is pressed
    * @param {boolean} s - If the s key is pressed
    * @param {boolean} d - If the d key is pressed
+   * @param {number} gamma - The gamma value of the device's orientation
+   * @param {number} beta - The beta value of the device's orientation
    */
-  constructor(playerId, w, a, s, d) {
+  constructor({
+    playerId, w, a, s, d, gamma, beta,
+  }) {
     this.playerId = playerId;
     this.w = w;
     this.a = a;
     this.s = s;
     this.d = d;
+    this.gamma = gamma;
+    this.beta = beta;
   }
 }
 

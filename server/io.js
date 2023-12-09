@@ -31,10 +31,9 @@ const initSocketEvents = (socket) => {
   });
 
   socket.on('playerMovement', (packet) => {
-    const {
-      w, a, s, d,
-    } = packet;
-    game.onPlayerMovementPacket(new packets.PlayerMovementPacket(socket.id, w, a, s, d));
+    game.onPlayerMovementPacket(
+      new packets.PlayerMovementPacket({ playerId: socket.id, ...packet }),
+    );
   });
 
   const gameData = game.getGameData();
