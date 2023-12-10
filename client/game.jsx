@@ -4,6 +4,7 @@ const Phaser = require('phaser');
 
 const utils = require('./utils.js');
 const gameUtils = require('./gameUtils.js');
+const items = require('../server/game/items.js');
 
 let socket;
 
@@ -315,6 +316,18 @@ class GameWindow extends React.Component {
 }
 
 const init = () => {
+  const purchaseItem = (itemId) => {
+    if (items[itemId]) {
+      // TODO: Implement this
+    }
+  };
+  document.querySelectorAll('.item-container').forEach((itemContainer) => {
+    const buyButton = itemContainer.querySelector('.buy-button');
+    buyButton.addEventListener('click', () => {
+      purchaseItem(itemContainer.dataset.itemId);
+    });
+  });
+
   const sendChatMessage = () => {
     const chatInput = document.getElementById('chat-input');
     if (chatInput.value) {
