@@ -14,6 +14,33 @@ function isMobile() {
 
 const isClientMobile = isMobile();
 
+const showChatMessage = (username, color, msg, timestamp) => {
+  // Container for the chat message
+  const messageContainer = document.createElement('article');
+  messageContainer.className = 'media';
+  // Wrapper for the message content
+  const messageContentWrapper = document.createElement('div');
+  messageContentWrapper.className = 'media-content';
+  // Container for the actual message text
+  const messageTextContainer = document.createElement('div');
+  messageTextContainer.className = 'content';
+  messageTextContainer.innerHTML = `<p><span class="${color}">${username}</span> <small>${new Date(
+    timestamp,
+  ).toLocaleTimeString()}</small><br>${msg}</p>`;
+  // Create close button
+  const closeButton = document.createElement('button');
+  closeButton.className = 'delete mr-1';
+  closeButton.setAttribute('aria-label', 'delete message');
+  closeButton.onclick = () => messageContainer.remove();
+  // Assemble the message structure
+  messageContentWrapper.appendChild(messageTextContainer);
+  messageContainer.appendChild(messageContentWrapper);
+  messageContainer.appendChild(closeButton); // Add close button to the message container
+  // Add the complete message to the chat window
+  document.getElementById('chat-messages').append(messageContainer);
+  messageContainer.scrollIntoView({ behavior: 'smooth', block: 'end' });
+};
+
 class GameWindow extends React.Component {
   /** @type {Phaser.GameObjects.Graphics} */
   graphics;
@@ -100,10 +127,13 @@ class GameWindow extends React.Component {
       console.log('Canvas clicked');
       this.game.canvas.focus();
     });
+    // Focus on canvas at the beginning
+    this.game.canvas.focus();
 
     socket = io();
     // Register socket event handlers
     socket.on('rejected', (reason) => {
+      showChatMessage('System', 'chat-error', reason, Date.now());
       console.log(`Rejected by server: ${reason}`);
       // Destroy the game instance and remove the canvas element
       this.game.destroy(true);
@@ -119,35 +149,17 @@ class GameWindow extends React.Component {
         net: gameData.net,
       });
     });
-    const addMessage = (packet) => {
+    const showPlayerChatMessage = (packet) => {
       const { username, team, msg, timestamp } = packet;
-      // Container for the chat message
-      const messageContainer = document.createElement('article');
-      messageContainer.className = 'media';
-      // Wrapper for the message content
-      const messageContentWrapper = document.createElement('div');
-      messageContentWrapper.className = 'media-content';
-      // Container for the actual message text
-      const messageTextContainer = document.createElement('div');
-      messageTextContainer.className = 'content';
-      // Format and set the message content
-      let teamColorClass = 'chat-no-team';
+      let color = 'chat-no-team';
       if (team === 'RED') {
-        teamColorClass = 'chat-red-team';
+        color = 'chat-red-team';
       } else if (team === 'BLUE') {
-        teamColorClass = 'chat-blue-team';
+        color = 'chat-blue-team';
       }
-      messageTextContainer.innerHTML = `<p><span class=${teamColorClass}>${username}</span> <small>${new Date(
-        timestamp,
-      ).toLocaleTimeString()}</small><br>${msg}</p>`;
-      // Assemble the message structure
-      messageContentWrapper.appendChild(messageTextContainer);
-      messageContainer.appendChild(messageContentWrapper);
-      // Add the complete message to the chat window
-      document.getElementById('chat-messages').append(messageContainer);
-      messageContainer.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      showChatMessage(username, color, msg, timestamp);
     };
-    socket.on('chatMessage', addMessage);
+    socket.on('chatMessage', showPlayerChatMessage);
     socket.on('syncChatHistory', (chatHistory) => {
       if (!Array.isArray(chatHistory)) {
         return;
@@ -161,7 +173,7 @@ class GameWindow extends React.Component {
           timestamp: new Date(msgData.timestamp).toLocaleTimeString(),
         })),
       );
-      chatHistory.forEach(addMessage);
+      chatHistory.forEach(showPlayerChatMessage);
     });
 
     // Create graphics object
@@ -316,15 +328,31 @@ class GameWindow extends React.Component {
 }
 
 const init = () => {
-  const purchaseItem = (itemId) => {
-    if (items[itemId]) {
-      // TODO: Implement this
+  const purchaseItem = (itemId, itemContainer) => {
+    if (!itemId || !items[itemId]) {
+      showChatMessage('System', 'chat-error', 'Item not found', Date.now());
+      return;
     }
+    utils.sendPost(
+      '/api/user/purchaseItem',
+      { itemId },
+      {
+        onError: (result) => {
+          showChatMessage('System', 'chat-error', result.error, Date.now());
+        },
+        onSuccess: (result) => {
+          const buyButton = itemContainer.querySelector('.buy-button');
+          buyButton.setAttribute('disabled', true);
+          buyButton.textContent = 'Purchased';
+          showChatMessage('System', 'chat-success', result.message, Date.now());
+        },
+      },
+    );
   };
   document.querySelectorAll('.item-container').forEach((itemContainer) => {
     const buyButton = itemContainer.querySelector('.buy-button');
     buyButton.addEventListener('click', () => {
-      purchaseItem(itemContainer.dataset.itemId);
+      purchaseItem(itemContainer.dataset.itemId, itemContainer);
     });
   });
 
@@ -334,6 +362,7 @@ const init = () => {
       socket.emit('chatMessage', { msg: chatInput.value, timestamp: Date.now() });
       chatInput.value = '';
     } else {
+      showChatMessage('System', 'chat-error', 'You cannot send an empty message', Date.now());
       console.log('You cannot send an empty message');
     }
   };
@@ -350,7 +379,20 @@ const init = () => {
   fetch('/api/user/info')
     .then((res) => res.json())
     .then((info) => {
-      document.getElementById('navbar-username').textContent = info.username;
+      const { username, items: purchasedItems } = info;
+      document.getElementById('navbar-username').textContent = username;
+      purchasedItems.forEach((itemData) => {
+        const itemContainer = document.querySelector(
+          `.item-container[data-item-id="${itemData.itemId}"]`,
+        );
+        if (!itemContainer) {
+          console.log(`Item container for ${itemData.itemId} not found`);
+          return;
+        }
+        const buyButton = itemContainer.querySelector('.buy-button');
+        buyButton.setAttribute('disabled', true);
+        buyButton.textContent = 'Purchased';
+      });
     });
 };
 

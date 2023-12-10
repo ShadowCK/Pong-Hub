@@ -21,7 +21,15 @@ const handleChangePassword = (e) => {
     return false;
   }
 
-  utils.sendPost(e.target.action, { oldPass, newPass, newPass2 });
+  utils.sendPost(
+    e.target.action,
+    { oldPass, newPass, newPass2 },
+    {
+      onError: (result) => {
+        utils.handleError(result.error);
+      },
+    },
+  );
 
   return false;
 };

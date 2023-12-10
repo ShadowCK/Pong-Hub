@@ -46,3 +46,13 @@ canvas {
   color: #0000ff;
   font-weight: bold;
 }
+
+.chat-error {
+  color: #ff0000;
+  font-weight: bold;
+}
+
+.chat-success {
+  color: #00ff00;
+  font-weight: bold;
+}

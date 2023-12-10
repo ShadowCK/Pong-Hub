@@ -1,4 +1,5 @@
 const models = require('../models');
+const items = require('../game/items.js');
 
 const { Account } = models;
 
@@ -54,12 +55,25 @@ const signup = async (req, res) => {
 };
 
 const getInfo = (req, res) => {
-  if (!req.session.account) {
+  const { account } = req.session;
+  if (!account) {
     // mid.requiresLogin ensures user is logged in.
     // If this occurs, something is wrong with the server.
-    return res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error' });
+    return;
   }
-  return res.status(200).json({ username: req.session.account.username });
+  Account.findById(account._id)
+    .then((doc) => {
+      if (!doc) {
+        res.status(404).json({ error: 'Document not found' });
+        return;
+      }
+      res.status(200).json({ username: doc.username, items: doc.items });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({ error: 'Internal server error' });
+    });
 };
 
 const changePasswordPage = (req, res) => res.render('changePassword');
@@ -98,6 +112,48 @@ const changePassword = async (req, res) => {
   return res.json({ redirect: '/' });
 };
 
+const purchaseItem = (req, res) => {
+  const userId = req.session.account._id;
+  const { itemId } = req.body;
+  if (!itemId) {
+    res.status(400).json({ error: 'Item name is required!' });
+    return;
+  }
+  const itemData = items[itemId];
+  if (!itemData) {
+    res.status(400).json({ error: 'Item does not exist!' });
+    return;
+  }
+  // Skip price because we just want to showcase the profit model.
+  // TODO: In the future, make the price in-game currency instead of "real money".
+  Account.findById(userId)
+    .then((doc) => {
+      const exists = doc.items.some((item) => item.itemId === itemId);
+      if (exists) {
+        res.status(400).json({ error: 'Item already purchased!' });
+        return;
+      }
+      doc.items.push({
+        itemId,
+        name: itemData.name,
+        description: itemData.description,
+        price: itemData.price,
+      });
+      // TODO: Save the doc atomically like for chat history
+      doc
+        .save()
+        .then(() => res.status(200).json({ message: 'Item purchased!' }))
+        .catch((err) => {
+          console.log(err);
+          res.status(500).json({ error: 'An error occured!' });
+        });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({ error: 'An error occured!' });
+    });
+};
+
 module.exports = {
   loginPage,
   login,
@@ -106,4 +162,5 @@ module.exports = {
   getInfo,
   changePasswordPage,
   changePassword,
+  purchaseItem,
 };

@@ -15,12 +15,33 @@ const mongoose = require('mongoose');
 */
 const saltRounds = 10;
 
-let AccountModel = {};
+let _AccountModel = {};
 
 /* Our schema defines the data we will store. A username (string of alphanumeric
    characters), a password (actually the hashed version of the password created
    by bcrypt), and the created date.
 */
+
+const ItemSchema = new mongoose.Schema({
+  itemId: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+  name: {
+    type: String,
+    required: true,
+  },
+  description: {
+    type: String,
+    required: true,
+  },
+  price: {
+    type: Number,
+    required: true,
+  },
+});
+
 const AccountSchema = new mongoose.Schema({
   username: {
     type: String,
@@ -36,6 +57,10 @@ const AccountSchema = new mongoose.Schema({
   createdDate: {
     type: Date,
     default: Date.now,
+  },
+  items: {
+    type: [ItemSchema],
+    default: [],
   },
 });
 
@@ -57,7 +82,7 @@ AccountSchema.statics.generateHash = (password) => bcrypt.hash(password, saltRou
 */
 AccountSchema.statics.authenticate = async (username, password, callback) => {
   try {
-    const doc = await AccountModel.findOne({ username }).exec();
+    const doc = await _AccountModel.findOne({ username }).exec();
     if (!doc) {
       return callback();
     }
@@ -72,5 +97,6 @@ AccountSchema.statics.authenticate = async (username, password, callback) => {
   }
 };
 
-AccountModel = mongoose.model('Account', AccountSchema);
+const AccountModel = mongoose.model('Account', AccountSchema);
+_AccountModel = AccountModel;
 module.exports = AccountModel;

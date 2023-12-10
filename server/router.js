@@ -24,6 +24,12 @@ const router = (app) => {
     mid.requiresLogin,
     controllers.Account.changePassword,
   );
+  app.post(
+    '/api/user/purchaseItem',
+    mid.requiresSecure,
+    mid.requiresLogin,
+    controllers.Account.purchaseItem,
+  );
 };
 
 module.exports = router;

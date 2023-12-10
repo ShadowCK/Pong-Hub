@@ -15,7 +15,15 @@ const handleLogin = (e) => {
     return false;
   }
 
-  utils.sendPost(e.target.action, { username, pass });
+  utils.sendPost(
+    e.target.action,
+    { username, pass },
+    {
+      onError: (result) => {
+        utils.handleError(result.error);
+      },
+    },
+  );
 
   return false;
 };
@@ -37,7 +45,15 @@ const handleSignup = (e) => {
     return false;
   }
 
-  utils.sendPost(e.target.action, { username, pass, pass2 });
+  utils.sendPost(
+    e.target.action,
+    { username, pass, pass2 },
+    {
+      onError: (result) => {
+        utils.handleError(result.error);
+      },
+    },
+  );
 
   return false;
 };

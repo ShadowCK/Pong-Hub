@@ -6,7 +6,8 @@ const handleError = (message) => {
 /* Sends post requests to the server using fetch. Will look for various
      entries in the response JSON object, and will handle them appropriately.
   */
-const sendPost = async (url, data, handler) => {
+const sendPost = async (url, data, handlers = {}) => {
+  const { onError, onSuccess, postProcess } = handlers;
   const response = await fetch(url, {
     method: 'POST',
     headers: {
@@ -24,11 +25,15 @@ const sendPost = async (url, data, handler) => {
   }
 
   if (result.error) {
-    handleError(result.error);
+    if (typeof onError === 'function') {
+      onError(result);
+    }
+  } else if (typeof onSuccess === 'function') {
+    onSuccess(result);
   }
 
-  if (handler && typeof handler === 'function') {
-    handler(result);
+  if (typeof postProcess === 'function') {
+    postProcess(result);
   }
 };
 
