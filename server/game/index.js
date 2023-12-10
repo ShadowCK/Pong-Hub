@@ -90,7 +90,7 @@ const redTeamGoal = Bodies.rectangle(25, 300, 50, 600, { ...goalOptions, team: '
 const blueTeamGoal = Bodies.rectangle(775, 300, 50, 600, { ...goalOptions, team: 'BLUE' });
 const goals = [redTeamGoal, blueTeamGoal];
 World.add(engine.world, goals);
-const net = Bodies.rectangle(400, 300, 10, 600, { isStatic: true, collisionFilter: FILTER_NET });
+const net = Bodies.rectangle(400, 300, 40, 600, { isStatic: true, collisionFilter: FILTER_NET });
 World.add(engine.world, net);
 
 /** @type {{ [playerId: string]: Player }} */
