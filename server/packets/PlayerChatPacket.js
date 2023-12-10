@@ -1,6 +1,6 @@
 class PlayerChatPacket {
   /**
-   * @param {string} playerId - The id of the player (socket.id)
+   * @param {string} playerId - The id of the player (socket.id, not account._id)
    * @param {string} username - The username of the player
    * @param {string} msg - The message content
    * @param {number} timestamp - The timestamp of the message

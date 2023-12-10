@@ -30,6 +30,8 @@ const redis = require('redis');
 const router = require('./router.js');
 // Socket.io setup
 const socketSetup = require('./io.js');
+// Game script
+const game = require('./game');
 
 const port = process.env.PORT || process.env.NODE_PORT || 3000;
 
@@ -83,4 +85,7 @@ redisClient.connect().then(() => {
     }
     console.log(`Listening on port ${port}`);
   });
+
+  // Processes after server successfully starts
+  game.initChatHistory(serverStartTime);
 });

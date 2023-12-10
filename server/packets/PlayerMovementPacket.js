@@ -1,6 +1,6 @@
 class PlayerMovementPacket {
   /**
-   * @param {string} playerId - The id of the player (socket.id)
+   * @param {string} playerId - The id of the player (socket.id, not account._id)
    * @param {boolean} w - If the w key is pressed
    * @param {boolean} a - If the a key is pressed
    * @param {boolean} s - If the s key is pressed

@@ -4,6 +4,8 @@ const Player = require('./Player.js');
 const Ball = require('./Ball.js');
 const { states, getGameState, setGameState } = require('./stateMachine.js');
 const BitBuilder = require('./BitBuilder.js');
+// MongoDB models
+const { ChatHistory } = require('../models');
 
 // #region Collision Filters Setup
 // Note: Bodies without collision filter will collide with everything
@@ -226,6 +228,72 @@ const onPlayerMovementPacket = (packet) => {
     }
     updatePlayerVelocity();
   }
+};
+
+let chatHistory = null;
+
+const initChatHistory = (serverStartTime) => {
+  // Delete empty chat histories
+  ChatHistory.deleteMany({ history: { $size: 0 } })
+    .then((result) => {
+      console.log('Empty chat histories cleared:', result);
+      // Create new ChatHistory document
+      return new ChatHistory({ history: [], serverStartupTime: serverStartTime }).save();
+    })
+    .then((savedDocument) => {
+      chatHistory = savedDocument;
+      console.log('Chat history initialized and saved:', savedDocument);
+    })
+    .catch((error) => {
+      console.error('Error during chat history initialization:', error);
+    });
+};
+
+/**
+ * @returns chat messages ordered from earliest to latest
+ */
+const getRecentChatHistory = (msgCount) => ChatHistory.find()
+  .sort({ serverStartTime: 1 }) // 1 for ascending order
+  .lean()
+  .then((chatHistories) => chatHistories
+    .flatMap(
+      (doc) => doc.history
+        .map((msg) => ({
+          ..._.omit(msg, 'timestamp', '_id'),
+          timestamp: msg.timestamp.getTime(),
+        }))
+        .sort((a, b) => a.timestamp - b.timestamp), // ascending order
+    )
+    .slice(-msgCount))
+  .catch((error) => {
+    console.error('Error getting recent chat history:', error);
+    return null;
+  });
+
+/**
+ * @param {import('../packets/index.js').PlayerChatPacket} packet
+ */
+const onPlayerChatPacket = (packet) => {
+  if (!chatHistory) {
+    // Player joined and sent a message too fast - technically impossible for a human
+    console.error('Chat history is not initialized');
+    return;
+  }
+  const newMessage = {
+    username: packet.username,
+    msg: packet.msg,
+    team: packet.team,
+    timestamp: packet.timestamp,
+  };
+  console.log(newMessage);
+  // Atomically adds the new message to the 'history' array
+  ChatHistory.updateOne({ _id: chatHistory._id }, { $push: { history: newMessage } })
+    .then((result) => {
+      console.log('Chat message added:', result, newMessage);
+    })
+    .catch((error) => {
+      console.error('Error adding chat message:', error);
+    });
 };
 
 const physicsUpdateIterations = 4;
@@ -519,6 +587,9 @@ Events.on(engine, 'collisionEnd', (event) => {
 
 module.exports = {
   onPlayerMovementPacket,
+  onPlayerChatPacket,
+  initChatHistory,
+  getRecentChatHistory,
   gameLoop,
   addPlayer,
   removePlayer,

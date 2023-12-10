@@ -37,19 +37,21 @@ const initSocketEvents = (socket) => {
     );
   });
 
-  socket.on('chatMessage', (packet) => {
+  socket.on('chatMessage', (clientPacket) => {
+    // Does not allow empty messages
+    if (!clientPacket.msg) {
+      return;
+    }
     const { session } = socket.request;
     const { team } = game.players[socket.id];
-    io.emit(
-      'chatMessage',
-      new packets.PlayerChatPacket({
-        playerId: socket.id,
-        username: session.account.username,
-        team,
-        ...packet,
-      }),
-    );
-    // TODO: Add a chat history to the game state and call game.onPlayerChatPacket to update it.
+    const serverPacket = new packets.PlayerChatPacket({
+      playerId: socket.id,
+      username: session.account.username,
+      team,
+      ...clientPacket,
+    });
+    io.emit('chatMessage', serverPacket);
+    game.onPlayerChatPacket(serverPacket);
   });
 
   const gameData = game.getGameData();
@@ -94,6 +96,11 @@ const socketSetup = (app, sessionMiddleware, serverStartTime) => {
 
     console.log('The user connected');
     console.log(session);
+
+    // Sync recent chat history
+    game.getRecentChatHistory(10).then((result) => {
+      socket.emit('syncChatHistory', result);
+    });
 
     // Regularly check if the session is still valid. If not, disconnect the user.
     const timer = setInterval(() => {

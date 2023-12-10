@@ -118,9 +118,8 @@ class GameWindow extends React.Component {
         net: gameData.net,
       });
     });
-    socket.on('chatMessage', (packet) => {
-      console.log(packet);
-      const { username, msg, timestamp } = packet;
+    const addMessage = (packet) => {
+      const { username, team, msg, timestamp } = packet;
       // Container for the chat message
       const messageContainer = document.createElement('article');
       messageContainer.className = 'media';
@@ -132,9 +131,9 @@ class GameWindow extends React.Component {
       messageTextContainer.className = 'content';
       // Format and set the message content
       let teamColorClass = 'chat-no-team';
-      if (packet.team === 'RED') {
+      if (team === 'RED') {
         teamColorClass = 'chat-red-team';
-      } else if (packet.team === 'BLUE') {
+      } else if (team === 'BLUE') {
         teamColorClass = 'chat-blue-team';
       }
       messageTextContainer.innerHTML = `<p><span class=${teamColorClass}>${username}</span> <small>${new Date(
@@ -146,7 +145,24 @@ class GameWindow extends React.Component {
       // Add the complete message to the chat window
       document.getElementById('chat-messages').append(messageContainer);
       messageContainer.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    };
+    socket.on('chatMessage', addMessage);
+    socket.on('syncChatHistory', (chatHistory) => {
+      if (!Array.isArray(chatHistory)) {
+        return;
+      }
+      const chatMessages = document.getElementById('chat-messages');
+      // Cleanup chat messages if there are any, in case of reconnection without page refresh
+      chatMessages.innerHTML = '';
+      console.table(
+        chatHistory.map((msgData) => ({
+          ...msgData,
+          timestamp: new Date(msgData.timestamp).toLocaleTimeString(),
+        })),
+      );
+      chatHistory.forEach(addMessage);
     });
+
     // Create graphics object
     this.graphics = scene.add.graphics({ fillStyle: { color: 0x00000 } });
     // Register inputs
@@ -301,8 +317,12 @@ class GameWindow extends React.Component {
 const init = () => {
   const sendChatMessage = () => {
     const chatInput = document.getElementById('chat-input');
-    socket.emit('chatMessage', { msg: chatInput.value, timestamp: Date.now() });
-    chatInput.value = '';
+    if (chatInput.value) {
+      socket.emit('chatMessage', { msg: chatInput.value, timestamp: Date.now() });
+      chatInput.value = '';
+    } else {
+      console.log('You cannot send an empty message');
+    }
   };
   document.getElementById('send-button').addEventListener('click', () => {
     sendChatMessage();
