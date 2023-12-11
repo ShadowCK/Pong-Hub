@@ -30,6 +30,12 @@ const router = (app) => {
     mid.requiresLogin,
     controllers.Account.purchaseItem,
   );
+  // For non-existent routes, redirect to the login/game page depending on login status.
+  // requiresLogin leads non-logged-in users to the login page.
+  // requiresLogout leads logged-in users to the game page.
+  // We do not need a controller for this route as it will never be reached.
+  // TODO: A 404 page would be better. For now, let's stick to redirection.
+  app.get('*', mid.requiresLogin, mid.requiresLogout);
 };
 
 module.exports = router;
