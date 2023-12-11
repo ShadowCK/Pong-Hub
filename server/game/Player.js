@@ -116,6 +116,15 @@ class Player {
         this.height *= 1.2;
         Matter.Body.scale(this.body, 1, 1.2);
         break;
+      case itemIds.godSpeed:
+        this.maxSpeed *= 1.25;
+        this.acceleration *= 2;
+        break;
+      case itemIds.obese:
+        this.width *= 1.25;
+        this.height *= 1.25;
+        Matter.Body.scale(this.body, 1.25, 1.25);
+        break;
       default:
         console.log(`Unhandled item id: ${itemId}`);
         return;
