@@ -6,24 +6,6 @@ const { itemIds, items } = require('./items.js');
  * @class
  */
 class Player {
-  id;
-
-  width;
-
-  height;
-
-  body;
-
-  // * "Seems Matter’s velocity is meters (pixels) per step or 1/60s"
-  // https://phaser.discourse.group/t/setting-velocity-for-matter-js-object/13327/3
-  maxSpeed = 200 / 60;
-
-  acceleration = 800 / 60;
-
-  team = null;
-
-  appliedItems = [];
-
   constructor(id, username, x, y, width, height, options = {}) {
     this.id = id;
     this.username = username;
@@ -42,6 +24,12 @@ class Player {
       ...options,
     });
     this.body.parentGameObject = this;
+    // * "Seems Matter’s velocity is meters (pixels) per step or 1/60s"
+    // https://phaser.discourse.group/t/setting-velocity-for-matter-js-object/13327/3
+    this.maxSpeed = 200 / 60;
+    this.acceleration = 800 / 60;
+    this.team = null;
+    this.appliedItems = [];
   }
 
   get position() {

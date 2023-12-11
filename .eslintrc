@@ -4,16 +4,5 @@
     "no-underscore-dangle": "off",
     "no-plusplus": "off",
     "import/extensions": "off"
-  },
-  // For dev purpose only. Will be removed after project is done.
-  "parserOptions": {
-    "ecmaFeatures": {
-      "jsx": true
-    },
-    "ecmaVersion": "latest"
-  },
-  "env": {
-    "browser": true,
-    "node": true
   }
 }

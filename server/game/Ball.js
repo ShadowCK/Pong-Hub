@@ -7,15 +7,10 @@ const { Bodies } = Matter;
  * "The ball" is also true for now, but in the future there will be more balls
  */
 class Ball {
-  body;
-
-  minSpeed = 100 / 60;
-
-  maxSpeed = 400 / 60;
-
-  team = null;
-
   constructor(x, y, radius, options) {
+    this.minSpeed = 100 / 60;
+    this.maxSpeed = 400 / 60;
+    this.team = null;
     this.body = Bodies.circle(x, y, radius, {
       restitution: 0.9,
       // TODO: setting this to smaller than 0.001 somehow does not
