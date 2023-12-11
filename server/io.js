@@ -4,7 +4,7 @@ const { Server } = require('socket.io');
 const game = require('./game');
 const packets = require('./packets');
 
-const SESSION_RELOAD_INTERVAL = 3 * 1000;
+const SESSION_RELOAD_INTERVAL = 30 * 1000;
 
 /** @type {import('socket.io').Server} */
 let io;
@@ -71,6 +71,9 @@ const socketSetup = (app, sessionMiddleware, serverStartTime) => {
   io.on('connection', async (socket) => {
     console.log('A user tries to connect');
     const { session } = socket.request;
+
+    // TODO: verify the user like in the http requests - if the user
+    // is logged in but the account is not found, log them out.
 
     // I tried to use a socket.io middleware to disconnect but then the client
     // won't receive the 'rejected' event

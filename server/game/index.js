@@ -518,6 +518,10 @@ const onPlayerJoin = (socket) => {
   }
   // Apply purchased items
   Account.findById(account._id).then((doc) => {
+    if (!doc) {
+      console.log(`Account ${account._id} not found.`);
+      return;
+    }
     doc.items.forEach((item) => {
       player.applyItem(item.itemId);
     });

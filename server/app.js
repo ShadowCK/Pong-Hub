@@ -32,6 +32,8 @@ const router = require('./router.js');
 const socketSetup = require('./io.js');
 // Game script
 const game = require('./game');
+// Custom middleware
+const { verifyUser } = require('./middleware');
 
 const port = process.env.PORT || process.env.NODE_PORT || 3000;
 
@@ -69,6 +71,7 @@ redisClient.connect().then(() => {
     saveUninitialized: false,
   });
   app.use(sessionMiddleware);
+  app.use(verifyUser);
 
   app.engine('handlebars', expressHandlebars.engine({ defaultLayout: '' }));
   app.set('view engine', 'handlebars');
@@ -77,6 +80,8 @@ redisClient.connect().then(() => {
   router(app);
 
   const { server, io } = socketSetup(app, sessionMiddleware, serverStartTime);
+  // Can use req.app.get('io') to get the socket.io instance
+  app.set('io', io);
 
   server.listen(port, (err) => {
     if (err) {
@@ -84,8 +89,6 @@ redisClient.connect().then(() => {
     }
     console.log(`Listening on port ${port}`);
   });
-  // Can use req.app.get('io') to get the socket.io instance
-  app.set('io', io);
 
   // Processes after server successfully starts
   game.initChatHistory(serverStartTime);
