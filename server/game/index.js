@@ -142,8 +142,8 @@ const makeBodyData = (body) => ({
 });
 
 /**
+ * Creates an object with necessary data for the client to represent a player
  * @param {Player} player
- * @returns
  */
 const makePlayerData = (player) => {
   const { username, body, team } = player;
@@ -154,6 +154,9 @@ const makePlayerData = (player) => {
   };
 };
 
+/**
+ * Creates an object with necessary data for the client to represent the ball
+ */
 const makeBallData = () => {
   if (ball == null) {
     return null;
@@ -164,6 +167,10 @@ const makeBallData = () => {
   };
 };
 
+/**
+ * Creates an object with necessary data for the client to render the game
+ * Note: part of the data may not be used for rendering but is useful for other purposes.
+ */
 const getGameData = () => ({
   gameState,
   players: _.mapObject(players, makePlayerData),
@@ -177,6 +184,7 @@ const getGameData = () => ({
 });
 
 /**
+ * Updates player's velocity based on their inputs.
  * @param {import('../packets/index.js').PlayerMovementPacket} packet
  */
 const onPlayerMovementPacket = (packet) => {
@@ -239,6 +247,10 @@ const onPlayerMovementPacket = (packet) => {
 
 let chatHistory = null;
 
+/**
+ * Prepares the chat history document for the current server session.
+ * @param {number} serverStartTime
+ */
 const initChatHistory = (serverStartTime) => {
   // Delete empty chat histories
   ChatHistory.deleteMany({ history: { $size: 0 } })
@@ -278,6 +290,7 @@ const getRecentChatHistory = (msgCount) => ChatHistory.find()
   });
 
 /**
+ * Adds a chat message to the chat history document.
  * @param {import('../packets/index.js').PlayerChatPacket} packet
  */
 const onPlayerChatPacket = (packet) => {
@@ -332,6 +345,9 @@ const gameLoop = () => {
   gameState.lastUpdatedTime = currentTime;
 };
 
+/**
+ * Adds a player to the game.
+ */
 const addPlayer = (playerId, username, x, y, width, height) => {
   const player = new Player(playerId, username, x, y, width, height, {
     collisionFilter: FILTER_PLAYER,
@@ -341,6 +357,10 @@ const addPlayer = (playerId, username, x, y, width, height) => {
   return player;
 };
 
+/**
+ * Removes a player from in-game state.
+ * @param {Player} player
+ */
 const stopPlayerPlaying = (player) => {
   if (gameState.state !== states.IN_GAME) {
     console.info('Player is not playing, in-game data cleanup is skipped.');
@@ -359,6 +379,10 @@ const stopPlayerPlaying = (player) => {
   }
 };
 
+/**
+ * Removes a player from the game
+ * @param {number} playerId
+ */
 const removePlayer = (playerId) => {
   if (players[playerId]) {
     const player = players[playerId];
@@ -369,6 +393,7 @@ const removePlayer = (playerId) => {
 };
 
 /**
+ * Position players of each team in a suitable formation.
  * @param {Player[]} playerArr
  * @param {{x:number,y:number}} center
  * @param {{x:number,y:number}} spread
@@ -394,6 +419,9 @@ const placePlayers = (playerArr, center, spread) => {
   });
 };
 
+/**
+ * Starts a new turn for the in-game state.
+ */
 const newTurn = () => {
   console.log('New turn started!');
   // Reset players' collision filters
@@ -427,6 +455,9 @@ const newTurn = () => {
   });
 };
 
+/**
+ * Starts the game.
+ */
 const startGame = () => {
   console.log('Game started!');
   // Reset scores
@@ -449,6 +480,9 @@ const startGame = () => {
   newTurn();
 };
 
+/**
+ * Ends the game.
+ */
 const endGame = () => {
   console.log('Game ended!');
   // Remove current players from teams
@@ -464,6 +498,9 @@ const endGame = () => {
   }
 };
 
+/**
+ * Balances the number of players in each team. Only allow 1 player difference.
+ */
 const balanceTeams = () => {
   let diff = redTeamPlayers.length - blueTeamPlayers.length;
   console.log(`Red Team has ${diff} more players than Blue Team`);
@@ -472,7 +509,7 @@ const balanceTeams = () => {
     return;
   }
   if (Math.sign(diff) === 1) {
-    // Red team has more than 2 players than blue team
+    // Red team has no fewer than 2 players than blue team
     while (diff > 1) {
       const player = redTeamPlayers.pop();
       player.setTeam('BLUE');
@@ -480,7 +517,7 @@ const balanceTeams = () => {
       diff -= 2;
     }
   } else {
-    // Blue team has more than 2 players than red team
+    // Blue team has no fewer than 2 players than red team
     while (diff < -1) {
       const player = blueTeamPlayers.pop();
       player.setTeam('RED');
@@ -528,6 +565,9 @@ const onPlayerJoin = (socket) => {
   });
 };
 
+/**
+ * @param {import('socket.io').Socket} socket
+ */
 const onPlayerLeave = (socket) => {
   removePlayer(socket.id);
   if (Object.keys(players).length < 2) {
@@ -538,6 +578,12 @@ const onPlayerLeave = (socket) => {
   }
 };
 
+/**
+ * Handles the start event for an in-game collision
+ * @param {Matter.IEventCollision<Matter.Engine>} event - The collision event.
+ * @param {Matter.Body} bodyA - The first body involved in the collision.
+ * @param {Matter.Body} bodyB - The second body involved in the collision.
+ */
 const onInGameCollisionStart = (event, bodyA, bodyB) => {
   const checkGoal = () => {
     if (!ball) {
@@ -562,6 +608,12 @@ const onInGameCollisionStart = (event, bodyA, bodyB) => {
   checkGoal();
 };
 
+/**
+ * Handles the end event for an in-game collision
+ * @param {Matter.IEventCollision<Matter.Engine>} event - The collision event.
+ * @param {Matter.Body} bodyA - The first body involved in the collision.
+ * @param {Matter.Body} bodyB - The second body involved in the collision.
+ */
 const onInGameCollisionEnd = (event, bodyA, bodyB) => {
   const checkHit = () => {
     if (!ball) {

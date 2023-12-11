@@ -2,6 +2,10 @@ const Matter = require('matter-js');
 
 const { Bodies } = Matter;
 
+/**
+ * Represents a ball in the game.
+ * "The ball" is also true for now, but in the future there will be more balls
+ */
 class Ball {
   body;
 

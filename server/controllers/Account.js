@@ -4,13 +4,23 @@ const game = require('../game');
 
 const { Account } = models;
 
+/**
+ * Renders the login page.
+ */
 const loginPage = (req, res) => res.render('login');
 
+/**
+ * Logs the user out.
+ */
 const logout = (req, res) => {
   req.session.destroy();
   res.redirect('/');
 };
 
+/**
+ * Logs in the user.
+ * If successful, redirects to the game page. Otherwise, returns an error message.
+ */
 const login = (req, res) => {
   const { username, pass } = req.body;
 
@@ -29,6 +39,10 @@ const login = (req, res) => {
   });
 };
 
+/**
+ * Signs up the user.
+ * If successful, redirects to the game page. Otherwise, returns an error message.
+ */
 const signup = async (req, res) => {
   const { username, pass, pass2 } = req.body;
 
@@ -55,6 +69,10 @@ const signup = async (req, res) => {
   }
 };
 
+/**
+ * Gets the user's information (username and purchased items).
+ * @returns a JSON object containing the user's information or an error message.
+ */
 const getInfo = (req, res) => {
   const { account } = req.session;
   if (!account) {
@@ -77,8 +95,15 @@ const getInfo = (req, res) => {
     });
 };
 
+/**
+ * Renders the change password page.
+ */
 const changePasswordPage = (req, res) => res.render('changePassword');
 
+/**
+ * Changes a logged-in user's password.
+ * If successful, logs the user out. Otherwise, returns an error message.
+ */
 const changePassword = async (req, res) => {
   const { oldPass, newPass, newPass2 } = req.body;
 
@@ -113,6 +138,10 @@ const changePassword = async (req, res) => {
   return res.json({ redirect: '/' });
 };
 
+/**
+ * Purchases an item for the user.
+ * If successful, returns a success message. Otherwise, returns an error message.
+ */
 const purchaseItem = (req, res) => {
   const userId = req.session.account._id;
   const { itemId } = req.body;

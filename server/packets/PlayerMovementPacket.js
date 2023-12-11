@@ -1,3 +1,6 @@
+/**
+ * Describes a player's movement inputs. Used to update the player's velocity.
+ */
 class PlayerMovementPacket {
   /**
    * @param {string} playerId - The id of the player (socket.id, not account._id)

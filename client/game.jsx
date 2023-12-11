@@ -9,12 +9,18 @@ const { ItemStore, NavigationBar } = require('./components.jsx');
 
 let socket;
 
+/**
+ * @returns {boolean} Whether the client is on a mobile device
+ */
 function isMobile() {
   return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 }
 
 const isClientMobile = isMobile();
 
+/**
+ * Shows a chat message in the chat window.
+ */
 const showChatMessage = (username, color, msg, timestamp) => {
   // Container for the chat message
   const messageContainer = document.createElement('article');
@@ -202,8 +208,8 @@ class GameWindow extends React.Component {
     // Register inputs
     if (isClientMobile) {
       const updateOrientation = (event) => {
-        this.gamma = event.gamma; // -90~90 left and right tilt
-        this.beta = event.beta; // -180~180 front and back tilt
+        this.gamma = event.gamma; // -90-90 left and right tilt
+        this.beta = event.beta; // -180-180 front and back tilt
       };
       window.addEventListener('deviceorientation', updateOrientation, true);
     } else {
@@ -413,6 +419,7 @@ const init = () => {
   });
 
   ReactDOM.render(<GameWindow />, document.getElementById('content'));
+  // Update username on navbar, and update item store for purchased items
   fetch('/api/user/info')
     .then((res) => res.json())
     .then((info) => {

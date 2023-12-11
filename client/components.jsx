@@ -4,6 +4,9 @@
 
 const React = require('react');
 
+/**
+ * An input field for one of our forms.
+ */
 const FormInput = ({ label, id, name = id, type, placeholder }) => (
   <div className="field">
     <label className="label" htmlFor={id}>
@@ -15,6 +18,9 @@ const FormInput = ({ label, id, name = id, type, placeholder }) => (
   </div>
 );
 
+/**
+ * A submit button for one of our forms.
+ */
 const FormSubmit = ({ value }) => (
   <div className="field">
     <div className="control">
@@ -23,6 +29,9 @@ const FormSubmit = ({ value }) => (
   </div>
 );
 
+/**
+ * Represents a purchasable item.
+ */
 const ItemContainer = ({ itemId, item }) => (
   <div className="box item-container" data-item-id={itemId}>
     <article className="media">
@@ -47,10 +56,13 @@ const ItemContainer = ({ itemId, item }) => (
   </div>
 );
 
-// Note: this component renders a list of items without wrapping them in an additional div.
-// By using React Fragments (<>...</>), it directly returns an array of ItemContainer components.
-// This approach is useful when rendering the component into a specific DOM element like
-// 'items-content' in our case, so we don't have the headache of adding an extra div.
+/**
+ * Renders a list of purchasable items.
+ * Note: this component renders elements without wrapping them in an additional div.
+ * By using React Fragments (<>...</>), it directly returns an array of ItemContainer components.
+ * This approach is useful when rendering the component into a specific DOM element like
+ * 'items-content' in our case, so we don't have the headache of adding an extra div.
+ */
 const ItemStore = ({ items }) => (
   <>
     {Object.entries(items).map(([itemId, item]) => (
@@ -59,6 +71,9 @@ const ItemStore = ({ items }) => (
   </>
 );
 
+/**
+ * Main section that contains dynamically rendered content.
+ */
 const ContentSection = ({ title, children }) => (
   <section className="section">
     <div className="container">
@@ -68,6 +83,9 @@ const ContentSection = ({ title, children }) => (
   </section>
 );
 
+/**
+ * A message box that displays error messages.
+ */
 const MessageBox = ({ message, isVisible }) => (
   <section className="section">
     <div className="container">
@@ -84,6 +102,9 @@ const MessageBox = ({ message, isVisible }) => (
   </section>
 );
 
+/**
+ * Navigation bar for the website.
+ */
 const NavigationBar = ({ start, children }) => {
   const [isActive, setIsActive] = React.useState(false);
 

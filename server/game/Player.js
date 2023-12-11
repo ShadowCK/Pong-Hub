@@ -1,6 +1,10 @@
 const Matter = require('matter-js');
 const { itemIds, items } = require('./items.js');
 
+/**
+ * Represents a player in the game.
+ * @class
+ */
 class Player {
   id;
 
