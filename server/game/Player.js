@@ -1,4 +1,5 @@
 const Matter = require('matter-js');
+const { itemIds, items } = require('./items.js');
 
 class Player {
   id;
@@ -16,6 +17,8 @@ class Player {
   acceleration = 800 / 60;
 
   team = null;
+
+  appliedItems = [];
 
   constructor(id, username, x, y, width, height, options = {}) {
     this.id = id;
@@ -92,6 +95,32 @@ class Player {
    */
   moveBy(deltaX, deltaY) {
     Matter.Body.translate(this.body, { x: deltaX, y: deltaY });
+  }
+
+  applyItem(itemId) {
+    // Already applied
+    if (this.appliedItems.includes(itemId)) {
+      return;
+    }
+    const isValidId = items[itemId] != null;
+    if (!isValidId) {
+      console.error(`Invalid item id: ${itemId}`);
+      return;
+    }
+    switch (itemId) {
+      case itemIds.faster:
+        this.maxSpeed *= 1.2;
+        this.acceleration *= 1.2;
+        break;
+      case itemIds.stronger:
+        this.height *= 1.2;
+        Matter.Body.scale(this.body, 1, 1.2);
+        break;
+      default:
+        console.log(`Unhandled item id: ${itemId}`);
+        return;
+    }
+    this.appliedItems.push(itemId);
   }
 }
 

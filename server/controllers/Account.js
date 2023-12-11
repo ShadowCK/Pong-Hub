@@ -1,5 +1,6 @@
 const models = require('../models');
-const items = require('../game/items.js');
+const { items } = require('../game/items.js');
+const game = require('../game');
 
 const { Account } = models;
 
@@ -152,6 +153,14 @@ const purchaseItem = (req, res) => {
       console.log(err);
       res.status(500).json({ error: 'An error occured!' });
     });
+  // If the user is in-game, apply the item immediately
+  const { isConnectedToGame, socketId } = req.session;
+  if (isConnectedToGame && socketId) {
+    const player = game.players[socketId];
+    if (player) {
+      player.applyItem(itemId);
+    }
+  }
 };
 
 module.exports = {

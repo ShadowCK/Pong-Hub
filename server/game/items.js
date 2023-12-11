@@ -6,15 +6,20 @@
  * @property {number} price
  */
 
-/** @type {{ [itemId: string]: Item }} */
+const itemIds = {
+  faster: 'faster',
+  stronger: 'stronger',
+};
+
+/** @type {{ [itemKey: string]: Item }} */
 const items = {
-  faster: {
+  [itemIds.faster]: {
     image: '/assets/img/items/faster.png',
     name: 'Faster',
     description: 'Increases your max speed and acceleration by 20%',
     price: 1000,
   },
-  stronger: {
+  [itemIds.stronger]: {
     image: '/assets/img/items/stronger.png',
     name: 'Stronger',
     description: 'Increases your height by 20%',
@@ -22,4 +27,4 @@ const items = {
   },
 };
 
-module.exports = items;
+module.exports = { itemIds, items };

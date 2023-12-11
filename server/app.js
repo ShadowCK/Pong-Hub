@@ -76,8 +76,7 @@ redisClient.connect().then(() => {
 
   router(app);
 
-  // socket.io library can add socket.io to existing http or express servers.
-  const server = socketSetup(app, sessionMiddleware, serverStartTime);
+  const { server, io } = socketSetup(app, sessionMiddleware, serverStartTime);
 
   server.listen(port, (err) => {
     if (err) {
@@ -85,6 +84,8 @@ redisClient.connect().then(() => {
     }
     console.log(`Listening on port ${port}`);
   });
+  // Can use req.app.get('io') to get the socket.io instance
+  app.set('io', io);
 
   // Processes after server successfully starts
   game.initChatHistory(serverStartTime);

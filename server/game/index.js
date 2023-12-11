@@ -5,7 +5,7 @@ const Ball = require('./Ball.js');
 const { states, getGameState, setGameState } = require('./stateMachine.js');
 const BitBuilder = require('./BitBuilder.js');
 // MongoDB models
-const { ChatHistory } = require('../models');
+const { Account, ChatHistory } = require('../models');
 
 // #region Collision Filters Setup
 // Note: Bodies without collision filter will collide with everything
@@ -490,7 +490,8 @@ const balanceTeams = () => {
  * @param {import('socket.io').Socket} socket
  */
 const onPlayerJoin = (socket) => {
-  const player = addPlayer(socket.id, socket.request.session.account.username, 100, 100, 20, 100);
+  const { account } = socket.request.session;
+  const player = addPlayer(socket.id, account.username, 100, 100, 20, 100);
   // Start game if there are at least 2 players
   const currentState = getGameState();
   if (currentState === states.LOBBY && Object.keys(players).length >= 2) {
@@ -508,6 +509,12 @@ const onPlayerJoin = (socket) => {
       player.position = redTeamCenter;
     }
   }
+  // Apply purchased items
+  Account.findById(account._id).then((doc) => {
+    doc.items.forEach((item) => {
+      player.applyItem(item.itemId);
+    });
+  });
 };
 
 const onPlayerLeave = (socket) => {

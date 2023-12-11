@@ -25,6 +25,7 @@ const initSocketEvents = (socket) => {
         console.log('Session alreay destroyed, probably because user logged out.');
       } else {
         session.isConnectedToGame = false;
+        delete session.socketId;
         session.save();
       }
     });
@@ -92,11 +93,11 @@ const socketSetup = (app, sessionMiddleware, serverStartTime) => {
     }
 
     session.isConnectedToGame = true;
+    session.socketId = socket.id;
     session.save();
 
     console.log('The user connected');
     console.log(session);
-
     // Sync recent chat history
     game.getRecentChatHistory(10).then((result) => {
       socket.emit('syncChatHistory', result);
@@ -126,7 +127,7 @@ const socketSetup = (app, sessionMiddleware, serverStartTime) => {
     // But it works for now
     io.emit('gameUpdate', game.getGameData());
   }, 1000 / 60);
-  return server;
+  return { server, io };
 };
 
 module.exports = socketSetup;

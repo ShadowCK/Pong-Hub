@@ -4,7 +4,7 @@ const Phaser = require('phaser');
 
 const utils = require('./utils.js');
 const gameUtils = require('./gameUtils.js');
-const items = require('../server/game/items.js');
+const { items } = require('../server/game/items.js');
 
 let socket;
 
@@ -38,7 +38,15 @@ const showChatMessage = (username, color, msg, timestamp) => {
   messageContainer.appendChild(closeButton); // Add close button to the message container
   // Add the complete message to the chat window
   document.getElementById('chat-messages').append(messageContainer);
-  messageContainer.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  // This scrolls all ancestors (including the entire page) to ensure the message is visible,
+  // which might not be feasible
+  // messageContainer.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  // Instead, we simply scroll the chat window to the bottom
+  const chatMessages = document.getElementById('chat-messages');
+  chatMessages.scrollTo({
+    top: chatMessages.scrollHeight,
+    behavior: 'smooth',
+  });
 };
 
 class GameWindow extends React.Component {
@@ -116,19 +124,29 @@ class GameWindow extends React.Component {
     };
     this.game.canvas.setAttribute('tabindex', '0');
     this.game.canvas.addEventListener('focus', () => {
+      if (this.game == null) {
+        return;
+      }
       console.log('Canvas focused');
       this.game.input.keyboard.enabled = true;
     });
     this.game.canvas.addEventListener('blur', () => {
+      if (this.game == null) {
+        return;
+      }
       console.log('Canvas blurred');
       this.game.input.keyboard.enabled = false;
     });
     this.game.canvas.addEventListener('click', () => {
+      if (this.game == null) {
+        return;
+      }
       console.log('Canvas clicked');
       this.game.canvas.focus();
     });
     // Focus on canvas at the beginning
-    this.game.canvas.focus();
+    this.game.canvas.focus({ preventScroll: true });
+    document.body.scrollTo({ top: 0, behavior: 'smooth' });
 
     socket = io();
     // Register socket event handlers
@@ -137,6 +155,8 @@ class GameWindow extends React.Component {
       console.log(`Rejected by server: ${reason}`);
       // Destroy the game instance and remove the canvas element
       this.game.destroy(true);
+      // Note: game will not be destroyed immediately,
+      // that's why we have null checks in the canvas' event listeners
       this.game = null;
     });
     socket.on('gameUpdate', (gameData) => {
@@ -345,6 +365,8 @@ const init = () => {
           buyButton.setAttribute('disabled', true);
           buyButton.textContent = 'Purchased';
           showChatMessage('System', 'chat-success', result.message, Date.now());
+          const canvas = document.querySelector('#game-window canvas');
+          canvas.focus({ preventScroll: true });
         },
       },
     );
@@ -368,6 +390,9 @@ const init = () => {
   };
   document.getElementById('send-button').addEventListener('click', () => {
     sendChatMessage();
+    // Allow the user to send another message without having to click on the input box again
+    const chatInput = document.getElementById('chat-input');
+    chatInput.focus();
   });
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Enter' && document.activeElement === document.getElementById('chat-input')) {
