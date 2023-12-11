@@ -115,6 +115,9 @@ class Player {
       case itemIds.stronger:
         this.height *= 1.2;
         Matter.Body.scale(this.body, 1, 1.2);
+        // Matter.js will recalculate multiple attributes of the body when scaling,
+        // including inertia. We need to set it back to Infinity to prevent rotation.
+        Matter.Body.setInertia(this.body, Infinity);
         break;
       case itemIds.godSpeed:
         this.maxSpeed *= 1.25;
@@ -124,6 +127,7 @@ class Player {
         this.width *= 1.25;
         this.height *= 1.25;
         Matter.Body.scale(this.body, 1.25, 1.25);
+        Matter.Body.setInertia(this.body, Infinity);
         break;
       default:
         console.log(`Unhandled item id: ${itemId}`);

@@ -130,6 +130,13 @@ const makeBodyData = (body) => ({
   ..._.pick(body, 'position', 'angle', 'circleRadius'),
   x: body.position.x,
   y: body.position.y,
+  // FIXME: The width and height here are not accurate for rotated bodies
+  // On the client the body will appear larger than it actually is. Below is why -
+  // For rotated bodies, 'width' and 'height' are the width and height of the bounding box
+  // We want the actual width and height of the body (the client uses the actual dimensions
+  // to draw them), which can be done by unrotating the body and getting the width and height
+  // of the unrotated bounding box.
+  // * As we won't have rotated bodies for now, this is not a priority.
   width: body.bounds.max.x - body.bounds.min.x,
   height: body.bounds.max.y - body.bounds.min.y,
 });
