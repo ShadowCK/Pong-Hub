@@ -31,9 +31,12 @@ const showChatMessage = (username, color, msg, timestamp) => {
   // Container for the actual message text
   const messageTextContainer = document.createElement('div');
   messageTextContainer.className = 'content';
-  messageTextContainer.innerHTML = `<p><span class="${color}">${username}</span> <small>${new Date(
-    timestamp,
-  ).toLocaleTimeString()}</small><br>${msg}</p>`;
+  const chatDate = new Date(timestamp);
+  const isToday = chatDate.toLocaleDateString() === new Date().toLocaleDateString();
+  const timeString = isToday
+    ? chatDate.toLocaleTimeString()
+    : `${chatDate.toLocaleDateString()} ${chatDate.toLocaleTimeString()}`;
+  messageTextContainer.innerHTML = `<p><span class="${color}">${username}</span> <small>${timeString}</small><br>${msg}</p>`;
   // Create close button
   const closeButton = document.createElement('button');
   closeButton.className = 'delete mr-1';
@@ -197,7 +200,7 @@ class GameWindow extends React.Component {
       console.table(
         chatHistory.map((msgData) => ({
           ...msgData,
-          timestamp: new Date(msgData.timestamp).toLocaleTimeString(),
+          timestamp: new Date(msgData.timestamp).toLocaleString(),
         })),
       );
       chatHistory.forEach(showPlayerChatMessage);
