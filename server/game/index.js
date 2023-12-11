@@ -86,11 +86,11 @@ const walls = [
 // Add walls to the game world
 World.add(engine.world, walls);
 const goalOptions = { isStatic: true, isSensor: true, collisionFilter: FILTER_GOAL };
-const redTeamGoal = Bodies.rectangle(25, 300, 50, 600, { ...goalOptions, team: 'RED' });
-const blueTeamGoal = Bodies.rectangle(775, 300, 50, 600, { ...goalOptions, team: 'BLUE' });
+const redTeamGoal = Bodies.rectangle(10, 300, 20, 600, { ...goalOptions, team: 'RED' });
+const blueTeamGoal = Bodies.rectangle(790, 300, 20, 600, { ...goalOptions, team: 'BLUE' });
 const goals = [redTeamGoal, blueTeamGoal];
 World.add(engine.world, goals);
-const net = Bodies.rectangle(400, 300, 40, 600, { isStatic: true, collisionFilter: FILTER_NET });
+const net = Bodies.rectangle(400, 300, 20, 600, { isStatic: true, collisionFilter: FILTER_NET });
 World.add(engine.world, net);
 
 /** @type {{ [playerId: string]: Player }} */
@@ -103,6 +103,7 @@ const blueTeamPlayers = [];
 let ball = null;
 const redTeamCenter = { x: 200, y: 300 };
 const blueTeamCenter = { x: 600, y: 300 };
+const noMultipleHits = false; // TODO: Will be configurable in the future
 
 const gameState = {
   get state() {
@@ -425,10 +426,12 @@ const placePlayers = (playerArr, center, spread) => {
 const newTurn = () => {
   console.log('New turn started!');
   // Reset players' collision filters
-  [...redTeamPlayers, ...blueTeamPlayers].forEach((player) => {
-    const playerBody = player.body;
-    playerBody.collisionFilter = FILTER_PLAYER;
-  });
+  if (noMultipleHits) {
+    [...redTeamPlayers, ...blueTeamPlayers].forEach((player) => {
+      const playerBody = player.body;
+      playerBody.collisionFilter = FILTER_PLAYER;
+    });
+  }
   // Reset ball's belonging / which team hit it
   ball.team = null;
   // Place players in their respective positions
@@ -628,10 +631,20 @@ const onInGameCollisionEnd = (event, bodyA, bodyB) => {
       const player = playerIsB ? bodyB.parentGameObject : bodyA.parentGameObject;
       const { team } = player;
       ball.team = team;
-      [...redTeamPlayers, ...blueTeamPlayers].forEach((p) => {
-        const playerBody = p.body;
-        playerBody.collisionFilter = p.team === team ? FILTER_PLAYER_NO_BALL : FILTER_PLAYER;
-      });
+      const previousSpeed = ball.speed;
+      ball.velocity = Matter.Vector.add(
+        Matter.Vector.mult(ball.velocity, 0.5),
+        Matter.Vector.mult(player.velocity, 0.5),
+      );
+      if (ball.speed < previousSpeed) {
+        ball.speed = previousSpeed;
+      }
+      if (noMultipleHits) {
+        [...redTeamPlayers, ...blueTeamPlayers].forEach((p) => {
+          const playerBody = p.body;
+          playerBody.collisionFilter = p.team === team ? FILTER_PLAYER_NO_BALL : FILTER_PLAYER;
+        });
+      }
     }
   };
   checkHit();
