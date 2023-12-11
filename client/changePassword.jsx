@@ -1,7 +1,7 @@
 const React = require('react');
 const ReactDOM = require('react-dom');
 
-const { FormInput, FormButton } = require('./components.jsx');
+const { FormInput, FormSubmit } = require('./components.jsx');
 const utils = require('./utils.js');
 
 const handleChangePassword = (e) => {
@@ -50,7 +50,7 @@ const ChangePasswordWindow = () => (
       type="password"
       placeholder="retype new password"
     />
-    <FormButton value="Change Password" />
+    <FormSubmit value="Change Password" />
   </form>
 );
 

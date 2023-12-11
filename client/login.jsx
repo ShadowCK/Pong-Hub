@@ -1,7 +1,7 @@
 const React = require('react');
 const ReactDOM = require('react-dom');
 
-const { FormInput, FormButton } = require('./components.jsx');
+const { FormInput, FormSubmit } = require('./components.jsx');
 const utils = require('./utils.js');
 
 const handleLogin = (e) => {
@@ -62,7 +62,7 @@ const LoginWindow = () => (
   <form id="login-form" name="login-form" onSubmit={handleLogin} action="/login" method="POST">
     <FormInput label="Username:" id="username" type="text" placeholder="username" />
     <FormInput label="Password:" id="pass" type="password" placeholder="password" />
-    <FormButton value="Sign in" />
+    <FormSubmit value="Sign in" />
   </form>
 );
 
@@ -71,7 +71,7 @@ const SignupWindow = () => (
     <FormInput label="Username:" id="username" type="text" placeholder="username" />
     <FormInput label="Password:" id="pass" type="password" placeholder="password" />
     <FormInput label="Retype Password:" id="pass2" type="password" placeholder="retype password" />
-    <FormButton value="Sign up" />
+    <FormSubmit value="Sign up" />
   </form>
 );
 

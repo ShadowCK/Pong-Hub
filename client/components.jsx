@@ -11,7 +11,7 @@ const FormInput = ({ label, id, name = id, type, placeholder }) => (
   </div>
 );
 
-const FormButton = ({ value }) => (
+const FormSubmit = ({ value }) => (
   <div className="field">
     <div className="control">
       <input className="button is-primary" type="submit" value={value} />
@@ -19,4 +19,4 @@ const FormButton = ({ value }) => (
   </div>
 );
 
-module.exports = { FormInput, FormButton };
+module.exports = { FormInput, FormSubmit };
