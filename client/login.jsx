@@ -94,16 +94,9 @@ const init = () => {
   const signupButton = document.getElementById('signup-button');
 
   // Render initial window
-  // Note: showing the signup window by default is the "best practice" nowadays, somehow.
-  // I personally don't like it, because login is used much more often than signup.
-  // I guess websites weigh new users more than convenience for existing users.
-  // Actually, this is part of evil UX design but good business practice - they are notorious
-  // for being both annoying and effective.
-  // ! Although I don't like it, I'm using this pattern here for fun.
-  // Ref if interested: https://uxdesign.cc/10-evil-types-of-dark-ux-patterns-f5a408c43c62
   ReactDOM.render(
     <ContentSection title="Login to Pong Hub">
-      <SignupWindow />
+      <LoginWindow />
     </ContentSection>,
     document.getElementById('content-section'),
   );
