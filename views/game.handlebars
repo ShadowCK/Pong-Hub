@@ -93,32 +93,9 @@
             </div>
           </div>
         </div>
-        <!-- Dynamic content for items -->
-        {{#each items}}
-          <div class='box item-container' data-item-id='{{this._id}}'>
-            <article class='media'>
-              <div class='media-left'>
-                <figure class='image is-64x64'>
-                  <img src='{{this.image}}' alt='Item image' />
-                </figure>
-              </div>
-              <div class='media-content'>
-                <div class='content'>
-                  <p>
-                    <strong>{{this.name}}</strong>
-                    <br />
-                    {{this.description}}
-                  </p>
-                </div>
-              </div>
-              <div class='media-right'>
-                <button class='button is-success buy-button'>Buy for
-                  {{this.price}}
-                  Tiger Spirits</button>
-              </div>
-            </article>
-          </div>
-        {{/each}}
+        <div id='items-content'>
+          <!-- Items are generated here -->
+        </div>
       </div>
     </section>
 

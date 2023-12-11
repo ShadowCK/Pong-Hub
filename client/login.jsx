@@ -1,7 +1,7 @@
 const React = require('react');
 const ReactDOM = require('react-dom');
 
-const { FormInput, FormSubmit } = require('./components.jsx');
+const { FormInput, FormSubmit, ContentSection, MessageBox } = require('./components.jsx');
 const utils = require('./utils.js');
 
 const handleLogin = (e) => {
@@ -79,6 +79,22 @@ const init = () => {
   const loginButton = document.getElementById('login-button');
   const signupButton = document.getElementById('signup-button');
 
+  // Render initial window
+  // Note: showing the signup window by default is the "best practice" nowadays, somehow.
+  // I personally don't like it, because login is used much more often than signup.
+  // I guess websites weigh new users more than convenience for existing users.
+  // Actually, this is part of evil UX design but good business practice - they are notorious
+  // for being both annoying and effective.
+  // ! Although I don't like it, I'm using this pattern here for fun.
+  // Ref if interested: https://uxdesign.cc/10-evil-types-of-dark-ux-patterns-f5a408c43c62
+  ReactDOM.render(
+    <ContentSection title="Login to Pong Hub">
+      <SignupWindow />
+    </ContentSection>,
+    document.getElementById('content-section'),
+  );
+  ReactDOM.render(<MessageBox />, document.getElementById('message-box'));
+
   // Register event handlers
   loginButton.addEventListener('click', () => {
     ReactDOM.render(<LoginWindow />, document.getElementById('content'));
@@ -89,9 +105,6 @@ const init = () => {
     ReactDOM.render(<SignupWindow />, document.getElementById('content'));
     return false;
   });
-
-  // Render initial window
-  ReactDOM.render(<LoginWindow />, document.getElementById('content'));
 };
 
 window.onload = init;

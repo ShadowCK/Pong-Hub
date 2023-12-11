@@ -1,3 +1,6 @@
+// Note: not all React components are here. For example, GameWindow is in game.jsx
+// as it is closely related to other logic like rendering and using socket.io
+
 const React = require('react');
 
 const FormInput = ({ label, id, name = id, type, placeholder }) => (
@@ -19,4 +22,65 @@ const FormSubmit = ({ value }) => (
   </div>
 );
 
-module.exports = { FormInput, FormSubmit };
+const ItemContainer = ({ itemId, item }) => (
+  <div className="box item-container" data-item-id={itemId}>
+    <article className="media">
+      <div className="media-left">
+        <figure className="image is-64x64">
+          <img src={item.image} alt="Item image" />
+        </figure>
+      </div>
+      <div className="media-content">
+        <div className="content">
+          <p>
+            <strong>{item.name}</strong>
+            <br />
+            {item.description}
+          </p>
+        </div>
+      </div>
+      <div className="media-right">
+        <button className="button is-success buy-button">Buy for {item.price} Tiger Spirits</button>
+      </div>
+    </article>
+  </div>
+);
+
+// Note: this component renders a list of items without wrapping them in an additional div.
+// By using React Fragments (<>...</>), it directly returns an array of ItemContainer components.
+// This approach is useful when rendering the component into a specific DOM element like
+// 'items-content' in our case, so we don't have the headache of adding an extra div.
+const ItemStore = ({ items }) => (
+  <>
+    {Object.entries(items).map(([itemId, item]) => (
+      <ItemContainer key={itemId} itemId={itemId} item={item} />
+    ))}
+  </>
+);
+
+const ContentSection = ({ title, children }) => (
+  <section className="section">
+    <div className="container">
+      {title && <h2 className="title is-4">{title}</h2>}
+      <div id="content">{children}</div>
+    </div>
+  </section>
+);
+
+const MessageBox = ({ message, isVisible }) => (
+  <section className="section">
+    <div className="container">
+      <div id="msg-box" className="message is-danger">
+        <div
+          id="error-msg-container"
+          className="message-body"
+          style={{ display: isVisible ? 'block' : 'none' }}
+        >
+          <p id="error-msg">{message || 'No errors yet'}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+);
+
+module.exports = { FormInput, FormSubmit, ItemStore, ContentSection, MessageBox };

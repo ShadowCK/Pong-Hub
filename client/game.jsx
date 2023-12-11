@@ -5,6 +5,7 @@ const Phaser = require('phaser');
 const utils = require('./utils.js');
 const gameUtils = require('./gameUtils.js');
 const { items } = require('../server/game/items.js');
+const { ItemStore } = require('./components.jsx');
 
 let socket;
 
@@ -371,6 +372,7 @@ const init = () => {
       },
     );
   };
+  ReactDOM.render(<ItemStore items={items} />, document.getElementById('items-content'));
   document.querySelectorAll('.item-container').forEach((itemContainer) => {
     const buyButton = itemContainer.querySelector('.buy-button');
     buyButton.addEventListener('click', () => {

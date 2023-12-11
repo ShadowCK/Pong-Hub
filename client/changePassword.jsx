@@ -1,7 +1,7 @@
 const React = require('react');
 const ReactDOM = require('react-dom');
 
-const { FormInput, FormSubmit } = require('./components.jsx');
+const { FormInput, FormSubmit, ContentSection, MessageBox } = require('./components.jsx');
 const utils = require('./utils.js');
 
 const handleChangePassword = (e) => {
@@ -55,7 +55,13 @@ const ChangePasswordWindow = () => (
 );
 
 const init = () => {
-  ReactDOM.render(<ChangePasswordWindow />, document.getElementById('content'));
+  ReactDOM.render(
+    <ContentSection title="Change Password">
+      <ChangePasswordWindow />
+    </ContentSection>,
+    document.getElementById('content-section'),
+  );
+  ReactDOM.render(<MessageBox />, document.getElementById('message-box'));
 };
 
 window.onload = init;
