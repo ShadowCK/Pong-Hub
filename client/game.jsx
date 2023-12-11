@@ -5,7 +5,7 @@ const Phaser = require('phaser');
 const utils = require('./utils.js');
 const gameUtils = require('./gameUtils.js');
 const { items } = require('../server/game/items.js');
-const { ItemStore } = require('./components.jsx');
+const { ItemStore, NavigationBar } = require('./components.jsx');
 
 let socket;
 
@@ -349,6 +349,16 @@ class GameWindow extends React.Component {
 }
 
 const init = () => {
+  ReactDOM.render(
+    <NavigationBar
+      start={<a id="navbar-username" className="navbar-item">Username</a>}
+    >
+      <a className="button is-light" href="/changePassword">Change Password</a>
+      <a className="button is-light" href="/logout">Log Out</a>
+    </NavigationBar>,
+    document.getElementById('navbar'),
+  );
+
   const purchaseItem = (itemId, itemContainer) => {
     if (!itemId || !items[itemId]) {
       showChatMessage('System', 'chat-error', 'Item not found', Date.now());
@@ -424,5 +434,3 @@ const init = () => {
 };
 
 window.onload = init;
-
-utils.initBulmaNavbar();

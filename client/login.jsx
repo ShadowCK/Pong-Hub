@@ -1,7 +1,13 @@
 const React = require('react');
 const ReactDOM = require('react-dom');
 
-const { FormInput, FormSubmit, ContentSection, MessageBox } = require('./components.jsx');
+const {
+  FormInput,
+  FormSubmit,
+  ContentSection,
+  MessageBox,
+  NavigationBar,
+} = require('./components.jsx');
 const utils = require('./utils.js');
 
 const handleLogin = (e) => {
@@ -76,6 +82,14 @@ const SignupWindow = () => (
 );
 
 const init = () => {
+  ReactDOM.render(
+    <NavigationBar>
+      <a id="login-button" className="button is-light">Login</a>
+      <a id="signup-button" className="button is-light">Sign Up</a>
+    </NavigationBar>,
+    document.getElementById('navbar'),
+  );
+
   const loginButton = document.getElementById('login-button');
   const signupButton = document.getElementById('signup-button');
 
@@ -108,5 +122,3 @@ const init = () => {
 };
 
 window.onload = init;
-
-utils.initBulmaNavbar();

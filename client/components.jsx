@@ -1,5 +1,6 @@
-// Note: not all React components are here. For example, GameWindow is in game.jsx
-// as it is closely related to other logic like rendering and using socket.io
+// Note: not all React components are here. For example, GameWindow is in game.jsx as it is
+// closely related to other logic like rendering and using socket.io, and it's unique itself.
+// LoginWindow, SignupWindow and ChangePasswordWindow for similar reasons as well.
 
 const React = require('react');
 
@@ -83,4 +84,42 @@ const MessageBox = ({ message, isVisible }) => (
   </section>
 );
 
-module.exports = { FormInput, FormSubmit, ItemStore, ContentSection, MessageBox };
+const NavigationBar = ({ start, children }) => {
+  const [isActive, setIsActive] = React.useState(false);
+
+  const toggleNavbar = () => {
+    setIsActive(!isActive);
+  };
+
+  return (
+    <nav className="navbar" role="navigation" aria-label="main navigation">
+      <div className="navbar-brand">
+        <a className="navbar-item" href="/">
+          <img src="/assets/img/logo.png" width="112" height="28" />
+        </a>
+        <a
+          role="button"
+          className={`navbar-burger ${isActive ? 'is-active' : ''}`}
+          aria-label="menu"
+          aria-expanded="false"
+          onClick={toggleNavbar}
+        >
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </a>
+      </div>
+
+      <div id="navbar-body" className={`navbar-menu ${isActive ? 'is-active' : ''}`}>
+        {start && <div className="navbar-start">{start}</div>}
+        <div className="navbar-end">
+          <div className="navbar-item">
+            <div className="buttons">{children}</div>
+          </div>
+        </div>
+      </div>
+    </nav>
+  );
+};
+
+module.exports = { FormInput, FormSubmit, ItemStore, ContentSection, MessageBox, NavigationBar };

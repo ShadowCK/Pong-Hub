@@ -1,7 +1,13 @@
 const React = require('react');
 const ReactDOM = require('react-dom');
 
-const { FormInput, FormSubmit, ContentSection, MessageBox } = require('./components.jsx');
+const {
+  FormInput,
+  FormSubmit,
+  ContentSection,
+  MessageBox,
+  NavigationBar,
+} = require('./components.jsx');
 const utils = require('./utils.js');
 
 const handleChangePassword = (e) => {
@@ -56,6 +62,13 @@ const ChangePasswordWindow = () => (
 
 const init = () => {
   ReactDOM.render(
+    <NavigationBar>
+      <a className="button is-light" href="/game">Game</a>
+      <a className="button is-light" href="/logout">Log Out</a>
+    </NavigationBar>,
+    document.getElementById('navbar'),
+  );
+  ReactDOM.render(
     <ContentSection title="Change Password">
       <ChangePasswordWindow />
     </ContentSection>,
@@ -65,5 +78,3 @@ const init = () => {
 };
 
 window.onload = init;
-
-utils.initBulmaNavbar();

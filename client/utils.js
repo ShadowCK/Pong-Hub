@@ -37,21 +37,7 @@ const sendPost = async (url, data, handlers = {}) => {
   }
 };
 
-// Toggle visibility of navbar menu on smaller screens (width < 1024px) by clicking the burger
-const initBulmaNavbar = () => {
-  document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.navbar-burger').forEach((burger) => {
-      burger.addEventListener('click', () => {
-        const target = document.getElementById(burger.dataset.target);
-        burger.classList.toggle('is-active');
-        target.classList.toggle('is-active');
-      });
-    });
-  });
-};
-
 module.exports = {
   handleError,
   sendPost,
-  initBulmaNavbar,
 };
